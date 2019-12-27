@@ -1,0 +1,4 @@
+1;Laptarul;Nicolae;nico@cs.ubbcluj.ro
+2;Dascal;Grigore;dascalg@cs.ubbcluj.ro
+3;Gogoana;Tudor;gogo@cs.ubbcluj.ro
+4;Profu;';w@w.w

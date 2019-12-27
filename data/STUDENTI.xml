@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<students>
+    <student id="1">
+        <nume>Ana</nume>
+        <prenume>Maria</prenume>
+        <grupa>212</grupa>
+        <email>aa@aa.ro</email>
+        <cadru>Prof1</cadru>
+    </student>
+    <student id="2">
+        <nume>Andrei</nume>
+        <prenume>Muresan</prenume>
+        <grupa>223</grupa>
+        <email>am@ma.ama</email>
+        <cadru>Prof1</cadru>
+    </student>
+</students>

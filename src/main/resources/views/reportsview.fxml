@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="972.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.ReportController">
+   <children>
+      <TextArea layoutX="7.0" layoutY="14.0" prefHeight="38.0" prefWidth="156.0" text="Nota la laborator pentru fiecare student (media ponderată a notelor de latemele de laborator; pondere tema=nr de săptămâni alocate temei)" />
+      <TextArea layoutX="7.0" layoutY="61.0" prefHeight="38.0" prefWidth="156.0" text=" Cea mai grea tema: media notelor la tema respectivă este cea mai mică" />
+      <TextArea layoutX="7.0" layoutY="109.0" prefHeight="38.0" prefWidth="156.0" text="Studenții care pot intra în examen (media mai mare sau egală cu 4)" />
+      <TextArea layoutX="7.0" layoutY="155.0" prefHeight="38.0" prefWidth="156.0" text=" Studenții care au predat la timp toate temele" />
+      <Button layoutX="175.0" layoutY="21.0" mnemonicParsing="false" onAction="#handle1" text="Button" />
+      <Button layoutX="175.0" layoutY="68.0" mnemonicParsing="false" onAction="#handle2" text="Button" />
+      <Button layoutX="175.0" layoutY="116.0" mnemonicParsing="false" onAction="#handle3" text="Button" />
+      <Button layoutX="175.0" layoutY="162.0" mnemonicParsing="false" onAction="#handle4" text="Button" />
+      <BarChart layoutX="409.0" prefHeight="139.0" prefWidth="185.0">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </BarChart>
+      <PieChart layoutX="609.0" prefHeight="150.0" prefWidth="130.0" />
+      <TableView fx:id="tableViewStudents1" layoutX="429.0" layoutY="162.0" prefHeight="200.0" prefWidth="410.0">
+        <columns>
+          <TableColumn fx:id="tableStudentColumnNume" prefWidth="75.0" text="Nume" />
+          <TableColumn fx:id="tableStudentColumnPrenume" prefWidth="75.0" text="Prenume" />
+            <TableColumn fx:id="tableStudentColumnGrupa" prefWidth="75.0" text="Grupa" />
+            <TableColumn fx:id="tableStudentColumnEmail" prefWidth="75.0" text="Email" />
+            <TableColumn fx:id="tableStudentColumnProfIndrumator" prefWidth="75.0" text="Profesor" />
+        </columns>
+      </TableView>
+      <TextField fx:id="textField1" layoutX="245.0" layoutY="21.0" />
+      <TableView fx:id="tableViewRaport" layoutX="7.0" layoutY="200.0" prefHeight="200.0" prefWidth="200.0">
+        <columns>
+          <TableColumn fx:id="tableColumnStudent" prefWidth="75.0" text="Student" />
+          <TableColumn fx:id="tableColumnAVG" prefWidth="75.0" text="AVG" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

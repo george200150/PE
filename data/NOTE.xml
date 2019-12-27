@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<note>
+    <student id="1:1">
+        <data>2019/11/06</data>
+        <valoare>9</valoare>
+        <profesor>Prof1</profesor>
+    </student>
+    <student id="2:1">
+        <data>2019/11/12</data>
+        <valoare>10</valoare>
+        <profesor>Prof1</profesor>
+    </student>
+</note>

@@ -1,0 +1,5 @@
+1;;A;101;a.a@a.com;a
+2;A;;101;a.a@a.com;a
+3;A;A;-12;a.a@a.com;a
+4;A;A;999;aa.aa;a
+5;A;A;999;aa@a.aa;

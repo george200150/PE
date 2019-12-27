@@ -1,0 +1,7 @@
+admin::admin:0
+student:clir@scs.ubbcluj.ro:1234:1
+student:ion@vasile.scs.ubbclus.ro:1234:2
+profesor:nico@cs.ubbcluj.ro:prof:prof:1
+profesor:dascalg@cs.ubbcluj.ro:prof:2
+profesor:gogo@cs.ubbcluj.ro:prof:3
+profesor:w@w.w:w:4

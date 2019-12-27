@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<teme>
+    <tema id="1">
+        <nume>TEMA3</nume>
+        <descriere>DESCRIERE</descriere>
+        <startweek>28/10/2019</startweek>
+        <deadlineweek>5/11/2019</deadlineweek>
+    </tema>
+</teme>
