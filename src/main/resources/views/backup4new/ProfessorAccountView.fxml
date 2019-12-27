@@ -88,6 +88,7 @@
                         </Label>
                         <TableView fx:id="tableNota" layoutX="15.0" layoutY="153.0" onMouseClicked="#handleSelectionChanged" prefHeight="801.0" prefWidth="960.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
                           <columns>
+                              <TableColumn fx:id="columnNotaId" prefWidth="75.0" text="ID" />
                               <TableColumn fx:id="columnNotaStudent" prefWidth="75.0" text="Student" />
                               <TableColumn fx:id="columnNotaTema" prefWidth="92.0" text="Tema" />
                             <TableColumn fx:id="columnNotaData" prefWidth="88.0" text="Data" />
@@ -113,6 +114,11 @@
                         <Label layoutX="1066.0" layoutY="315.0" text="Valoare" />
                         <Label layoutX="1061.0" layoutY="360.0" text="Feedback" />
                         <Button layoutX="1223.0" layoutY="488.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                        <Label fx:id="labelWarning" layoutX="1148.0" layoutY="107.0" text="." textFill="RED">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
               </content>

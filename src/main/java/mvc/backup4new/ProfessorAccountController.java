@@ -53,6 +53,7 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
     public TextField textTemaDescriere;
 
     public TableView<NotaDTO> tableNota;
+    public TableColumn<NotaDTO,String> columnNotaId;
     public TableColumn<NotaDTO, String> columnNotaStudent;
     public TableColumn<NotaDTO, String> columnNotaTema;
     public TableColumn<NotaDTO, String> columnNotaData;
@@ -70,6 +71,7 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
     public PasswordField textNewPassword;
 
     public Label labelProfesor;
+    public Label labelWarning;
 
     public CheckBox checkboxInvert;
 
@@ -256,7 +258,7 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
 
     @FXML
     public void initialize() {
-
+        this.labelWarning.setText("");
         columnStudentNume.setCellValueFactory(new PropertyValueFactory<Student, String>("nume"));
         columnStudentPrenume.setCellValueFactory(new PropertyValueFactory<Student, String>("prenume"));
         columnStudentGrupa.setCellValueFactory(new PropertyValueFactory<Student, String>("grupa"));
@@ -300,14 +302,13 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
         }));
 
 
+        columnNotaId.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("idNota"));
         columnNotaData.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("dataNota"));
         columnNotaProfesor.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("profesor"));
         columnNotaValoare.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("valoare"));
-
         columnNotaStudent.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("studentString"));
         columnNotaTema.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("temaString"));
         columnNotaFeedback.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("feedback"));
-
         tableNota.setItems(modelN);
 
     }
@@ -387,6 +388,9 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
                 NotaDTO futureNota = this.tableNota.getSelectionModel().getSelectedItem();
                 futureNota.setValoare(Integer.parseInt(this.textNotaValoare.getText()));
                 //TODO: ... futureNota.set
+
+                //TODO: compute a shitload of things...
+
             }
             else{
                 StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Eroare","selectati un rand din tabela!");
@@ -400,7 +404,7 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
 
     public void handleDeleteNota(ActionEvent actionEvent) {
         if(!checkboxInvert.isSelected()){
-
+            //TODO: compute a shitload of things...
         }
         else{
             StudentAlert.showMessage(null, Alert.AlertType.WARNING,"Avertisment","pentru a intra in modul de stergere, debifati casuta!");
@@ -410,6 +414,7 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
     public void handleUpdateNota(ActionEvent actionEvent) {
         if(!checkboxInvert.isSelected()){
 
+            //TODO: compute a shitload of things...
         }
         else{
             StudentAlert.showMessage(null, Alert.AlertType.WARNING,"Avertisment","pentru a intra in modul de modificare, debifati casuta!");
@@ -430,6 +435,10 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
         this.dateTemaInceput.setText("");
         this.textTemaNume.setText("");
         this.dateTemaSfarsit.setText("");
+        if(this.checkboxInvert.isSelected())
+            this.labelWarning.setText("WARNING: On update, the values of the parameters are NOT checked if valid!");
+        else
+            this.labelWarning.setText("");
     }
 
 
@@ -443,10 +452,24 @@ public class ProfessorAccountController implements Observer<GradeChangeEvent> {
             this.dateNotaData.setValue(LocalDate.parse(nota.getDataNota(),Constants.DATE_TIME_FORMATTER));
             this.textNotaFeedback.setText(nota.getFeedback());
             this.textNotaTema.setText(nota.getT().toString());
+
         }
         else{
-            //TODO: compute 
+            //TODO: compute a shitload of things...
         }
 
     }
 }
+
+//TODO: lucrul cu notele
+//TODO: filtrari pentru nota (si ce cui mai trebui)
+//TODO: (AUTO) FUNCTION: compute grade
+//TODO: (AUTO) FUNCTION: compute feedback
+//TODO: (AUTO) FUNCTION (EXTRA FORM): add motivations (recompute grade considering motivations)
+//TODO: (AUTO) FUNCTION: compute grade ON date change
+//TODO:------------------------------
+//TODO: ^upper^ - !!! WHEN NEW FUTURE GRADE IS CREATED !!! (best time to compute) !!!
+//TODO:------------------------------
+//TODO: AUTO: on select grade from table AND INVERT is on - fill textfields with entity attributes
+//TODO: update + RESTRICTIONS
+//TODO: delete + RESTRICTIONS

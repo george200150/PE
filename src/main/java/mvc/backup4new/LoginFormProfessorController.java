@@ -7,8 +7,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -22,6 +25,8 @@ public class LoginFormProfessorController {
     TextField textFieldUserName;
     @FXML
     PasswordField passwordFieldUserPassword;
+    @FXML
+    Button buttonLogIn;
 
     private Stage dialogStage;
     private MasterService masterService;
@@ -98,6 +103,18 @@ public class LoginFormProfessorController {
         }
         else{
             StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Log In","Nu ati introdus corect numele de utilizator sau parola!");
+        }
+    }
+
+    public void handleUsrKeyPress(KeyEvent keyEvent) {
+        if(keyEvent.getCode().equals(KeyCode.ENTER)) {
+            this.passwordFieldUserPassword.requestFocus();
+        }
+    }
+
+    public void handlePsswdKeyPress(KeyEvent keyEvent) {
+        if(keyEvent.getCode().equals(KeyCode.ENTER)) {
+            this.buttonLogIn.fire();
         }
     }
 }

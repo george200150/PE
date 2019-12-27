@@ -20,8 +20,8 @@
       </Label>
       <Label layoutX="154.0" layoutY="132.0" text="Numele de utilizator:" />
       <Label layoutX="144.0" layoutY="183.0" text="Parola dumneavoastra:" />
-      <PasswordField fx:id="passwordFieldUserPassword" layoutX="274.0" layoutY="179.0" prefHeight="25.0" prefWidth="135.0" />
-      <Button layoutX="178.0" layoutY="248.0" mnemonicParsing="false" onAction="#handleLogIn" text="Conectati-va!" />
+      <PasswordField fx:id="passwordFieldUserPassword" layoutX="274.0" layoutY="179.0" onKeyPressed="#handleKeyPress" prefHeight="25.0" prefWidth="135.0" />
+      <Button fx:id="buttonLogIn" layoutX="178.0" layoutY="248.0" mnemonicParsing="false" onAction="#handleLogIn" text="Conectati-va!" />
       <Button layoutX="273.0" layoutY="248.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" prefHeight="25.0" prefWidth="87.0" text="Inapoi" />
       <Label layoutX="277.0" layoutY="132.0" text="admin" />
    </children>

@@ -42,9 +42,54 @@ public class MasterService implements Observable<GradeChangeEvent> {
     //TODO: pentru baza de date nu mai pun id la student/tema, ci direct referinte la obiecte
 
 
+    public String getStudentPassword(Student student){
+        for (String line : getPSSWDContent()) {
+            String[] components = line.split(":");
+            if(components.length != 0 && components[0].equals("student") && components[3].equals(student.getId()))
+                return components[2];
+        }
+        return null;
+    }
+
+    public String getProfesorPassword(Profesor profesor){
+        for (String line : getPSSWDContent()) {
+            String[] components = line.split(":");
+            if(components.length != 0 && components[0].equals("profesor") && components[3].equals(profesor.getId()))
+                return components[2];
+        }
+        return null;
+    }
+
+    public String getAdminPassword(){
+        for (String line : getPSSWDContent()) {
+            String[] components = line.split(":");
+            if(components.length != 0 && components[0].equals("admin"))
+                return components[2];
+        }
+        return null;
+    }
 
 
-    //TODO: CRUD PENTRU PROFESOR
+    public Profesor findByIdProfesor(String s) {
+        return profesorService.findById(s);
+    }
+
+    public Iterable<Profesor> getAllProfesor() {
+        return profesorService.getAll();
+    }
+
+    public Profesor addProfesor(Profesor entity) throws ValidationException {
+        return profesorService.add(entity);
+    }
+
+    public Profesor removeByIdProfesor(String s) {
+        return profesorService.removeById(s);
+    }
+
+    public Profesor updateProfesor(Profesor newEntity) {
+        return profesorService.update(newEntity);
+        }
+
 
 
 
@@ -77,6 +122,13 @@ public class MasterService implements Observable<GradeChangeEvent> {
         }
     }
 
+    public boolean changeAdminPassword(String newp){
+        String oldp = getAdminPassword();
+        String oldLine = "admin:"+""+":"+oldp+":"+"0";
+        String newLine = "admin:"+""+":"+newp+":"+"0";
+        changeLinePSSWD(oldLine,newLine);
+        return true;
+    }
 
 
 
