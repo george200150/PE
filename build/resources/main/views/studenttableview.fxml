@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="765.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.StudentTableViewController">
+   <children>
+      <SplitPane dividerPositions="0.4" prefHeight="400.0" prefWidth="766.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="172.0">
+               <children>
+                  <GridPane layoutX="29.0" layoutY="99.0" prefHeight="200.0" prefWidth="244.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <TextField fx:id="searchFieldEmail" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <TextField fx:id="searchFieldGrupa" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <TextField fx:id="searchFieldPrenume" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="searchFieldNume" GridPane.columnIndex="1" />
+                        <TextField fx:id="searchFieldProfesor" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Nume" />
+                        <Label text="Prenume" GridPane.rowIndex="1" />
+                        <Label text="Grupa" GridPane.rowIndex="2" />
+                        <Label text="Email" GridPane.rowIndex="3" />
+                        <Label text="Profesor" GridPane.rowIndex="4" />
+                     </children>
+                  </GridPane>
+                  <Label layoutX="100.0" layoutY="14.0" text="Search">
+                     <font>
+                        <Font size="35.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="440.0">
+               <children>
+                  <TableView fx:id="tableViewStudent" layoutY="64.0" prefHeight="266.0" prefWidth="455.0" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="64.0">
+                    <columns>
+                      <TableColumn fx:id="tableStudentColumnNume" maxWidth="150.0" minWidth="15.0" prefWidth="75.0" text="Nume" />
+                      <TableColumn fx:id="tableStudentColumnPrenume" maxWidth="150.0" minWidth="15.0" prefWidth="75.0" text="Prenume" />
+                        <TableColumn fx:id="tableStudentColumnGrupa" maxWidth="150.0" minWidth="15.0" prefWidth="75.0" text="Grupa" />
+                        <TableColumn fx:id="tableStudentColumnEmail" maxWidth="150.0" minWidth="15.0" prefWidth="75.0" text="Email" />
+                        <TableColumn fx:id="tableStudentColumnProfIndrumator" maxWidth="150.0" minWidth="15.0" prefWidth="82.0" text="Profesor" />
+                    </columns>
+                  </TableView>
+                  <ButtonBar layoutX="95.0" layoutY="333.0" prefHeight="51.0" prefWidth="237.0">
+                    <buttons>
+                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleAddStudent" text="Add" textAlignment="CENTER" />
+                      <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleDeleteStudent" prefWidth="101.0" text="Delete" textAlignment="CENTER" />
+                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleUpdateStudent" text="Update" textAlignment="CENTER" />
+                    </buttons>
+                  </ButtonBar>
+                  <Label layoutX="117.0" layoutY="14.0" text="CRUD Student">
+                     <font>
+                        <Font size="35.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
