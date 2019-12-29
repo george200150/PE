@@ -1,7 +1,6 @@
 1;Lupsa;Corneliu;223;clir@scs.ubbcluj.ro;Profu '
-123;123;123;123;1@a.b;123
 2;Iulian;Ditrau;212;email@email.email;Profu '
 3;Marian;Ioana;812;miie@scs.ubbro;Profu '
-4;Irimia;Larisa;821;larisika22@yahoo.com;Anca Andreica
+4;Irimia;Larisa;821;larisika22@yahoo.com;Laptarul Nicolae
 5;Cincinescu;Cinci;555;cinci55@cinci.cinci;Profu '
-6;Lucaci;Ion;345;li@il.lil;Profu'
+6;Lucaci;Ion;345;li@il.lil;Laptarul Nicolae
