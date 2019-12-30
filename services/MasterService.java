@@ -4,6 +4,9 @@ import domain.*;
 import utils.Constants;
 import utils.events.ChangeEventType;
 import utils.events.GradeChangeEvent;
+import utils.events.StudentChangeEvent;
+import utils.events.TaskChangeEvent;
+import utils.observer.*;
 import utils.observer.Observable;
 import utils.observer.Observer;
 import validators.ValidationException;
@@ -19,15 +22,20 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-public class MasterService implements Observable<GradeChangeEvent> {
+//public class MasterService implements Observable<GradeChangeEvent> {
+public class MasterService implements ObservableGrade, ObservableTask, ObservableStudent {
     private ProfesorService profesorService = null;
     private StudentService studentService = null;
     private TemaService temaService = null;
     private NotaService notaService = null;
     private MotivationService motivationService = null;
-    private  LoginCredentialsProxy loginCredentialsProxy = null;
-    private List<Observer<GradeChangeEvent>> observers = new ArrayList<>();
+    private LoginCredentialsProxy loginCredentialsProxy = null;
+    //private List<Observer<GradeChangeEvent>> observers = new ArrayList<>();
+    private List<GradeObserver> gradeObservers = new ArrayList<>();
+    private List<TaskObserver> taskObservers = new ArrayList<>();
+    private List<StudentObserver> studentObservers = new ArrayList<>();
 
     public MasterService(ProfesorService profesorService, StudentService studentService, TemaService temaService, NotaService notaService, MotivationService motivationService) {
         this.profesorService = profesorService;
@@ -40,6 +48,67 @@ public class MasterService implements Observable<GradeChangeEvent> {
     }
     //TODO: pentru baza de date nu mai pun id la student/tema, ci direct referinte la obiecte
 
+
+    public void deleteAllGradesOfStudent(Student student){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .forEach(x -> this.removeByIdNota(x.getId()));
+    }
+
+    public void deleteAllGradesOfTema(Tema tema){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[1].equals(tema.getId()))
+                .forEach(x -> this.removeByIdNota(x.getId()));
+    }
+
+    public void deleteAllStudentsOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .forEach(x -> this.removeByIdStudent(x.getId()));
+        deleteAllGradesOfProfesor(profesor);
+    }
+
+    public void deleteAllGradesOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))
+                .forEach(x -> this.removeByIdNota(x.getId()));
+    }
+
+
+    public void updateAllGradesOfStudent(Student student){
+        //nu exista update la grade (nota are numai id-ul) - este complicat de zic ca ar avea sens sa schimbi profesorul care a dat nota pe tema... e teoretic imposibil sa se schimbe proful...
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .forEach(x -> this.updateNota(new Nota(student.getId()+":"+x.getId().split(":")[1],x.getValoare(),student.getCadruDidacticIndrumatorLab(),x.getData(),x.getFeedback())));
+    }
+
+    public void updateAllGradesOfTema(Tema tema){
+        //teoretic, daca nu am schimba id-ul temei, nu ar avea sens update-ul...
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[1].equals(tema.getId()))
+                .forEach(x -> this.updateNota(new Nota(x.getId().split(":")[0]+":"+tema.getId(),x.getValoare(),x.getProfesor(),x.getData(),x.getFeedback())));
+    }
+
+    public void updateAllStudentsOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .forEach(x -> this.updateStudent(new Student(x.getId(),x.getNume(),x.getPrenume(),x.getGrupa(),x.getEmail(),profesor.toString())));
+        updateAllGradesOfProfesor(profesor);
+    }
+
+    public void updateAllGradesOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))
+                .forEach(x -> this.updateNota(new Nota(x.getId(),x.getValoare(),profesor.toString(),x.getData(),x.getFeedback())));
+    }
 
 
     public Profesor findByIdProfesor(String s) {
@@ -117,6 +186,32 @@ public class MasterService implements Observable<GradeChangeEvent> {
         this.loginCredentialsProxy.changeLinePSSWD(oldLine, newLine);
     }
 
+
+    public void addStudentPSSWD(Student student, String psswd){
+        this.loginCredentialsProxy.addStudentPSSWD(student, psswd);
+    }
+
+    public void addProfesorPSSWD(Profesor profesor, String psswd){
+        this.loginCredentialsProxy.addProfesorPSSWD(profesor, psswd);
+    }
+
+    public void updateStudentPSSWD(Student student, String psswd){
+        this.loginCredentialsProxy.updateStudentPSSWD(student, psswd);
+    }
+
+    public void updateProfesorPSSWD(Profesor profesor, String psswd){
+        this.loginCredentialsProxy.updateProfesorPSSWD(profesor, psswd);
+    }
+
+
+    public void deleteStudentPSSWD(Student student){
+        this.loginCredentialsProxy.deleteStudentPSSWD(student);
+    }
+
+    public void deleteProfesorPSSWD(Profesor profesor){
+        this.loginCredentialsProxy.deleteProfesorPSSWD(profesor);
+    }
+
     /*private List<String> getPSSWDContent() {
         return this.loginCredentialsProxy.getPSSWDContent();
     }*/
@@ -160,12 +255,27 @@ public class MasterService implements Observable<GradeChangeEvent> {
     public Iterable<Student> getAllStudent() {
         return studentService.getAll();
     }
-    public Student addStudent(Student entity) throws ValidationException { return studentService.add(entity); }
-    public Student removeByIdStudent(String s) {
-        return studentService.removeById(s);
+    public Student addStudent(Student entity) throws ValidationException {
+        Student r = studentService.add(entity);
+        if(r == null) {
+            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.ADD, entity));
+        }
+        return r;
     }
-    public Student updateStudent(Student entity) {
-        return studentService.update(entity);
+    public Student removeByIdStudent(String s) {
+        Student r = studentService.removeById(s);
+        if(r != null) {
+            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.DELETE, r));
+        }
+        return r;
+    }
+    public Student updateStudent(Student newEntity) {
+        Student oldStudent = studentService.findById(newEntity.getId());
+        Student res = studentService.update(newEntity);
+        if(res == null) {
+            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.UPDATE, newEntity, oldStudent));
+        }
+        return res;
     }
 
 
@@ -175,12 +285,27 @@ public class MasterService implements Observable<GradeChangeEvent> {
     public Iterable<Tema> getAllTema() {
         return temaService.getAll();
     }
-    public Tema addTema(Tema entity) throws ValidationException { return temaService.add(entity); }
-    public Tema removeByIdTema(String s) {
-        return temaService.removeById(s);
+    public Tema addTema(Tema entity) throws ValidationException {
+        Tema r = temaService.add(entity);
+        if(r == null) {
+            notifyObserversTask(new TaskChangeEvent(ChangeEventType.ADD, entity));
+        }
+        return r;
     }
-    public Tema updateTema(Tema entity) {
-        return temaService.update(entity);
+    public Tema removeByIdTema(String s) {
+        Tema r = temaService.removeById(s);
+        if(r != null) {
+            notifyObserversTask(new TaskChangeEvent(ChangeEventType.DELETE, r));
+        }
+        return r;
+    }
+    public Tema updateTema(Tema newEntity) {
+        Tema oldTask = temaService.findById(newEntity.getId());
+        Tema res = temaService.update(newEntity);
+        if(res == null) {
+            notifyObserversTask(new TaskChangeEvent(ChangeEventType.UPDATE, newEntity, oldTask));
+        }
+        return res;
     }
 
 
@@ -191,7 +316,7 @@ public class MasterService implements Observable<GradeChangeEvent> {
     public Nota addNota(Nota entity) throws ValidationException {
         Nota r = notaService.add(entity);
         if(r == null) {
-            notifyObservers(new GradeChangeEvent(ChangeEventType.ADD, entity));
+            notifyObserversGrade(new GradeChangeEvent(ChangeEventType.ADD, entity));
         }
         return r;
     }
@@ -199,16 +324,16 @@ public class MasterService implements Observable<GradeChangeEvent> {
         //return notaService.removeById(s);
         Nota r = notaService.removeById(s);
         if(r != null) {
-            notifyObservers(new GradeChangeEvent(ChangeEventType.DELETE, r));
+            notifyObserversGrade(new GradeChangeEvent(ChangeEventType.DELETE, r));
         }
         return r;
     }
     public Nota updateNota(Nota newEntity) {
         //return notaService.update(entity);
-        Nota oldStudent = notaService.findById(newEntity.getId());
+        Nota oldGrade = notaService.findById(newEntity.getId());
         Nota res = notaService.update(newEntity);
         if(res == null) {
-            notifyObservers(new GradeChangeEvent(ChangeEventType.UPDATE, newEntity, oldStudent));
+            notifyObserversGrade(new GradeChangeEvent(ChangeEventType.UPDATE, newEntity, oldGrade));
         }
         return res;
     }
@@ -420,42 +545,49 @@ public class MasterService implements Observable<GradeChangeEvent> {
     }
 
 
-
-    /*public Map<Student, Integer> raport1(){
-        Iterable<Nota> grades = notaService.getAll();
-        List<NotaDTO> gradeList = StreamSupport.stream(grades.spliterator(), false)
-                .map(x -> new NotaDTO(x, temaService.findById(x.getId().split(":")[1]), studentService.findById(x.getId().split(":")[0])))
-                .collect(Collectors.toList());
-
-        Map<Student,List<NotaDTO>> grouped = gradeList.stream()
-                .collect(Collectors.groupingBy(NotaDTO::getS));
-
-
-        grouped.values().stream()//TODO: get weighted average (weights represent week count / task)
-                .map(notaDTOS -> {//there are 14 weeks / semester
-                    double medie = notaDTOS.stream()
-                            .map(x -> x.getValoare() * ((Constants.getWeek(x.getDeadlineTema()) - Constants.getWeek(x.getStartTema())) / 14))
-                            .reduce(0, Integer::sum);
-                }).collect(Collectors.toList());//TODO: lista de note - trebuie eventual imperecheate -!!! CU UN NOU DTO !!!- pentru a putea afisa un raport al studentilor + mediilor lor.
-        //TODO:     .map( new DTOnou(Student, mediedouble).collect(Collectors.toList());
-    }*/
-
-
     @Override
-    public void addObserver(Observer<GradeChangeEvent> e) {
-        observers.add(e);
+    public void addObserverGrade(GradeObserver e) {
+        gradeObservers.add(e);
     }
 
     @Override
-    public void removeObserver(Observer<GradeChangeEvent> e) {
-        observers.remove(e);
+    public void removeObserverGrade(GradeObserver e) {
+        gradeObservers.remove(e);
     }
 
     @Override
-    public void notifyObservers(GradeChangeEvent t) {
-        observers.forEach(x->x.update(t));
+    public void notifyObserversGrade(GradeChangeEvent t) {
+        gradeObservers.forEach(x->x.updateGrade(t));
     }
 
+    @Override
+    public void addObserverStudent(StudentObserver e) {
+        studentObservers.add(e);
+    }
 
+    @Override
+    public void removeObserverStudent(StudentObserver e) {
+        studentObservers.remove(e);
+    }
+
+    @Override
+    public void notifyObserversStudent(StudentChangeEvent t) {
+        studentObservers.forEach(x->x.updateStudent(t));
+    }
+
+    @Override
+    public void addObserverTask(TaskObserver e) {
+        taskObservers.add(e);
+    }
+
+    @Override
+    public void removeObserverTask(TaskObserver e) {
+        taskObservers.remove(e);
+    }
+
+    @Override
+    public void notifyObserversTask(TaskChangeEvent t) {
+        taskObservers.forEach(x->x.updateTask(t));
+    }
 }
 

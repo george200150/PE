@@ -27,6 +27,66 @@ public class LoginCredentialsProxy {
         this.studentService = studentService;
     }
 
+
+    public void addStudentPSSWD(Student student, String psswd){
+        String line = "student:"+student.getEmail()+":"+psswd+":"+student.getId();
+        writeOneLine(line);
+    }
+
+    public void addProfesorPSSWD(Profesor profesor, String psswd){
+        String line = "profesor:"+profesor.getEmail()+":"+psswd+":"+profesor.getId();
+        writeOneLine(line);
+    }
+
+    private void writeOneLine(String line) {
+        Path path = Paths.get("data/PSSWD.txt");
+        ArrayList<String> tba = new ArrayList<>();
+        tba.add(line);
+        try {
+            Files.write(path, tba, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void updateStudentPSSWD(Student student, String psswd){
+        for (String line : getPSSWDContent()) {
+            String[] components = line.split(":");
+            if(components.length != 0 && components[0].equals("student") && components[3].equals(student.getId())) {
+                String newLine = "student:" + student.getEmail() + ":" + psswd + ":" + student.getId();
+                changeLinePSSWD(line, newLine);
+                break;
+            }
+        }
+    }
+
+    public void updateProfesorPSSWD(Profesor profesor, String psswd){
+        for (String line : getPSSWDContent()) {
+            String[] components = line.split(":");
+            if(components.length != 0 && components[0].equals("profesor") && components[3].equals(profesor.getId())) {
+                String newLine = "profesor:" + profesor.getEmail() + ":" + psswd + ":" + profesor.getId();
+                changeLinePSSWD(line, newLine);
+                break;
+            }
+        }
+    }
+
+
+    public void deleteStudentPSSWD(Student student){
+        String oldp = getStudentPassword(student);
+        String oldLine = "student:"+student.getEmail()+":"+oldp+":"+student.getId();
+        changeLinePSSWD(oldLine,"");
+    }
+
+    public void deleteProfesorPSSWD(Profesor profesor){
+        String oldp = getProfesorPassword(profesor);
+        String oldLine = "profesor:"+profesor.getEmail()+":"+oldp+":"+profesor.getId();
+        changeLinePSSWD(oldLine,"");
+    }
+
+
+
     public String getStudentPassword(Student student){
         for (String line : getPSSWDContent()) {
             String[] components = line.split(":");
