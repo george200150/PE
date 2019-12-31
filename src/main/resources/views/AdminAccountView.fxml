@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.AdminAccountController">
+   <children>
+      <TabPane layoutX="76.0" layoutY="54.0" prefHeight="1026.0" prefWidth="1920.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <tabs>
+          <Tab text="Studenti">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="tableStudenti" layoutX="5.0" layoutY="76.0" onMouseClicked="#handleLoadModelStudenti" prefHeight="640.0" prefWidth="790.0">
+                          <columns>
+                              <TableColumn fx:id="columnStudentId" prefWidth="65.0" text="Id" />
+                            <TableColumn fx:id="columnStudentNume" prefWidth="98.0" text="Nume" />
+                            <TableColumn fx:id="columnStudentPrenume" prefWidth="129.0" text="Prenume" />
+                              <TableColumn fx:id="columnStudentGrupa" prefWidth="77.0" text="Grupa" />
+                              <TableColumn fx:id="columnStudentProf" minWidth="0.0" prefWidth="161.0" text="Cadru Didactic Indrumator" />
+                              <TableColumn fx:id="columnStudentEmail" prefWidth="163.0" text="Email" />
+                              <TableColumn fx:id="columnStudentParola" prefWidth="96.0" text="Parola" />
+                          </columns>
+                        </TableView>
+                        <TextField fx:id="textIdStudent" layoutX="980.0" layoutY="52.0" AnchorPane.topAnchor="50.0" />
+                        <TextField fx:id="textGrupaStudent" layoutX="980.0" layoutY="243.0" AnchorPane.topAnchor="200.0" />
+                        <TextField fx:id="textPrenumeStudent" layoutX="980.0" layoutY="214.0" AnchorPane.topAnchor="150.0" />
+                        <TextField fx:id="textNumeStudent" layoutX="980.0" layoutY="85.0" AnchorPane.topAnchor="100.0" />
+                        <Label layoutX="948.0" layoutY="54.0" text="ID" AnchorPane.rightAnchor="955.0" />
+                        <Label layoutX="932.0" layoutY="204.0" text="Grupa" AnchorPane.rightAnchor="955.0" />
+                        <Label layoutX="915.0" layoutY="154.0" text="Prenume" AnchorPane.rightAnchor="955.0" />
+                        <Label layoutX="927.0" layoutY="104.0" text="Nume" AnchorPane.rightAnchor="955.0" />
+                        <Button layoutX="889.0" layoutY="397.0" mnemonicParsing="false" onAction="#handleAddStudent" text="Adauga" />
+                        <Button layoutX="960.0" layoutY="397.0" mnemonicParsing="false" onAction="#handleDeleteStudent" text="Sterge" />
+                        <Button layoutX="1039.0" layoutY="397.0" mnemonicParsing="false" onAction="#handleUpdateStudent" text="Modifica" />
+                        <Label layoutX="934.0" layoutY="254.0" text="Email" AnchorPane.rightAnchor="955.0" />
+                        <Label layoutX="821.0" layoutY="304.0" text="Cadru Didactic Indrumator" AnchorPane.rightAnchor="955.0" />
+                        <TextField fx:id="textEmailStudent" layoutX="980.0" layoutY="267.0" AnchorPane.topAnchor="250.0" />
+                        <TextField fx:id="textProfStudent" layoutX="980.0" layoutY="300.0" AnchorPane.topAnchor="300.0" />
+                        <Label layoutX="934.0" layoutY="354.0" text="Parola" />
+                        <TextField fx:id="textParolaStudent" layoutX="980.0" layoutY="338.0" AnchorPane.topAnchor="350.0" />
+                        <Label layoutX="43.0" layoutY="14.0" text="Vizualizati si gestionati studentii existenti:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Button layoutX="938.0" layoutY="451.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" text="Inapoi la LogIn" />
+                        <Button layoutX="804.0" layoutY="397.0" mnemonicParsing="false" onAction="#handleClearFieldsStudent" text="Reseteaza" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+            <Tab text="Teme">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="tableTeme" layoutX="43.0" layoutY="94.0" onMouseClicked="#handleLoadModelTeme" prefHeight="505.0" prefWidth="1070.0">
+                           <columns>
+                              <TableColumn fx:id="columnTemaId" prefWidth="102.0" text="ID" />
+                              <TableColumn fx:id="columnTemaNume" prefWidth="167.0" text="Nume Tema" />
+                              <TableColumn fx:id="columnTemaDescriere" prefWidth="167.0" text="Descriere Tema" />
+                              <TableColumn fx:id="columnTemaInceput" prefWidth="134.0" text="Inceput" />
+                              <TableColumn fx:id="columnTemaSfarsit" prefWidth="121.0" text="Sfarsit" />
+                           </columns>
+                        </TableView>
+                        <Button layoutX="1168.0" layoutY="462.0" mnemonicParsing="false" onAction="#handleAddTema" text="Adauga" />
+                        <Button layoutX="1296.0" layoutY="462.0" mnemonicParsing="false" onAction="#handleUpdateTema" text="Modifica" />
+                        <Button layoutX="1232.0" layoutY="520.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" text="Inapoi la LogIn" />
+                        <Button layoutX="1232.0" layoutY="462.0" mnemonicParsing="false" onAction="#handleDeleteTema" text="Sterge" />
+                        <TextField fx:id="textIdTema" layoutX="1239.0" layoutY="60.0" AnchorPane.rightAnchor="500.0" AnchorPane.topAnchor="50.0" />
+                        <TextField fx:id="textDescriereTema" layoutX="1271.0" layoutY="152.0" AnchorPane.topAnchor="150.0" />
+                        <TextField fx:id="textNumeTema" layoutX="1271.0" layoutY="99.0" AnchorPane.topAnchor="100.0" />
+                        <Label layoutX="1216.0" layoutY="104.0" text="Nume" />
+                        <Label layoutX="1220.0" layoutY="254.0" text="Sfarsit" />
+                        <Label layoutX="1212.0" layoutY="204.0" text="Inceput" />
+                        <Label layoutX="1236.0" layoutY="54.0" text="ID" />
+                        <Label layoutX="1200.0" layoutY="154.0" text="Descriere" />
+                        <DatePicker fx:id="dateInceputTema" layoutX="1272.0" layoutY="200.0" AnchorPane.topAnchor="200.0" />
+                        <DatePicker fx:id="dateSfarsitTema" layoutX="1272.0" layoutY="250.0" AnchorPane.topAnchor="250.0" />
+                        <Label layoutX="26.0" layoutY="15.0" text="Vizualizati si gestionati temele existente:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Button layoutX="1368.0" layoutY="462.0" mnemonicParsing="false" onAction="#handleClearFieldsTema" text="Reseteaza" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab text="Note">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="tableNote" layoutX="11.0" layoutY="55.0" prefHeight="657.0" prefWidth="1083.0">
+                          <columns>
+                              <TableColumn fx:id="columnNoteId" prefWidth="79.0" text="ID" />
+                            <TableColumn fx:id="columnNoteTema" prefWidth="182.0" text="Tema" />
+                              <TableColumn fx:id="columnNoteData" minWidth="0.0" prefWidth="91.0" text="Data" />
+                            <TableColumn fx:id="columnNoteStudent" minWidth="0.0" prefWidth="242.0" text="Student" />
+                              <TableColumn fx:id="columnNoteValoare" prefWidth="52.0" text="Valoare" />
+                              <TableColumn fx:id="columnNoteProf" prefWidth="191.0" text="Profesor" />
+                              <TableColumn fx:id="columnNoteFeedback" prefWidth="245.0" text="Feedback" />
+                          </columns>
+                        </TableView>
+                        <Button layoutX="257.0" layoutY="726.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" text="Inapoi la LogIn" />
+                        <Button layoutX="101.0" layoutY="726.0" mnemonicParsing="false" text="Sterge" />
+                        <Button layoutX="168.0" layoutY="727.0" mnemonicParsing="false" text="Modifica" />
+                        <Label layoutX="1282.0" layoutY="638.0" text="Valoare" />
+                        <Label layoutX="1268.0" layoutY="599.0" text="Profesor" />
+                        <Label layoutX="1291.0" layoutY="528.0" text="ID" />
+                        <Label layoutX="1290.0" layoutY="559.0" text="Data" />
+                        <Label layoutX="1265.0" layoutY="673.0" text="Feedback" />
+                        <TextField layoutX="1327.0" layoutY="634.0" />
+                        <TextField layoutX="1327.0" layoutY="594.0" />
+                        <TextField editable="false" layoutX="1329.0" layoutY="115.0" />
+                        <TextField layoutX="1327.0" layoutY="669.0" />
+                        <TextField layoutX="1316.0" layoutY="524.0" />
+                        <DatePicker layoutX="1325.0" layoutY="560.0" />
+                        <Label layoutX="1244.0" layoutY="296.0" text="Tema ID" />
+                        <Label layoutX="1251.0" layoutY="37.0" text="Student ID" />
+                        <TextField editable="false" layoutX="1329.0" layoutY="69.0" />
+                        <TextField editable="false" layoutX="1331.0" layoutY="33.0" />
+                        <TextField editable="false" layoutX="1331.0" layoutY="368.0" />
+                        <TextField editable="false" layoutX="1331.0" layoutY="329.0" />
+                        <TextField editable="false" layoutX="1329.0" layoutY="292.0" />
+                        <Label layoutX="1236.0" layoutY="454.0" text="Tema Sfarsit" />
+                        <Label layoutX="1240.0" layoutY="411.0" text="Tema Inceput" />
+                        <Label layoutX="1235.0" layoutY="372.0" text="Tema Descriere" />
+                        <Label layoutX="1244.0" layoutY="332.0" text="Tema Nume" />
+                        <DatePicker editable="false" layoutX="1325.0" layoutY="407.0" />
+                        <DatePicker editable="false" layoutX="1325.0" layoutY="450.0" />
+                        <Label layoutX="1233.0" layoutY="159.0" text="Student Grupa" />
+                        <Label layoutX="1225.0" layoutY="119.0" text="Student Prenume" />
+                        <Label layoutX="1239.0" layoutY="73.0" text="Student Nume" />
+                        <TextField editable="false" layoutX="1329.0" layoutY="155.0" />
+                        <Label layoutX="1235.0" layoutY="194.0" text="Student Email" />
+                        <TextField editable="false" layoutX="1329.0" layoutY="190.0" />
+                        <Label layoutX="1125.0" layoutY="227.0" text="Student Cadru Didactic Indrumator" />
+                        <TextField editable="false" layoutX="1329.0" layoutY="223.0" />
+                        <Label layoutX="61.0" layoutY="14.0" text="Vizualizati si modificati notele existente:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="565.0" layoutY="725.0" text="ALA BALA PORTOCALA CE BUNA E PORTOCALA">
+                           <font>
+                              <Font size="20.0" />
+                           </font></Label>
+                        <Button layoutX="363.0" layoutY="728.0" mnemonicParsing="false" onAction="#handleClearFieldsGrade" text="Reseteaza" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+          <Tab text="Profesori">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="tableProfesori" layoutX="37.0" layoutY="112.0" onMouseClicked="#handleLoadModelProfi" prefHeight="505.0" prefWidth="1070.0">
+                          <columns>
+                              <TableColumn fx:id="columnProfId" prefWidth="135.0" text="ID" />
+                            <TableColumn fx:id="columnProfNume" prefWidth="135.0" text="Nume" />
+                            <TableColumn fx:id="columnProfPrenume" prefWidth="112.0" text="Prenume" />
+                              <TableColumn fx:id="columnProfEmail" prefWidth="112.0" text="Email" />
+                              <TableColumn fx:id="columnProfParola" prefWidth="147.0" text="Parola" />
+                          </columns>
+                        </TableView>
+                        <Button layoutX="1218.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleAddProf" text="Adauga" />
+                        <Button layoutX="1299.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleDeleteProf" text="Sterge" />
+                        <Button layoutX="1370.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleUpdateProf" text="Modifica" />
+                        <Button layoutX="1454.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" text="Inapoi la LogIn" />
+                        <TextField fx:id="textIdProf" layoutX="1320.0" layoutY="53.0" AnchorPane.rightAnchor="451.0" AnchorPane.topAnchor="53.0" />
+                        <TextField fx:id="textEmailProf" layoutX="1320.0" layoutY="203.0" AnchorPane.rightAnchor="451.0" AnchorPane.topAnchor="203.0" />
+                        <TextField fx:id="textPrenumeProf" layoutX="1320.0" layoutY="153.0" AnchorPane.rightAnchor="451.0" AnchorPane.topAnchor="153.0" />
+                        <TextField fx:id="textNumeProf" layoutX="1320.0" layoutY="103.0" AnchorPane.rightAnchor="451.0" AnchorPane.topAnchor="103.0" />
+                        <Label layoutX="1287.0" layoutY="53.0" text="ID" AnchorPane.rightAnchor="621.0" AnchorPane.topAnchor="53.0" />
+                        <Label layoutX="1265.0" layoutY="253.0" text="Parola" AnchorPane.rightAnchor="621.0" AnchorPane.topAnchor="253.0" />
+                        <Label layoutX="1270.0" layoutY="203.0" text="Email" AnchorPane.rightAnchor="621.0" AnchorPane.topAnchor="203.0" />
+                        <Label layoutX="1266.0" layoutY="103.0" text="Nume" AnchorPane.rightAnchor="621.0" AnchorPane.topAnchor="103.0" />
+                        <Label layoutX="1251.0" layoutY="153.0" text="Prenume" AnchorPane.rightAnchor="621.0" AnchorPane.topAnchor="153.0" />
+                        <TextField fx:id="textParolaProf" layoutX="1320.0" layoutY="253.0" AnchorPane.rightAnchor="451.0" AnchorPane.topAnchor="253.0" />
+                        <Label layoutX="37.0" layoutY="14.0" text="Vizualizati si gestionati profesorii existenti:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Button layoutX="1132.0" layoutY="309.0" mnemonicParsing="false" onAction="#handleClearFieldsProf" text="Reseteaza" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+            <Tab text="Admin">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Button layoutX="344.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleModificaAdminParola" text="Modifica" />
+                        <Button layoutX="442.0" layoutY="152.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" text="Inapoi la LogIn" />
+                        <TextField fx:id="textAdminParola" layoutX="409.0" layoutY="103.0" />
+                        <Label layoutX="322.0" layoutY="107.0" text="Parola" />
+                        <Label layoutX="49.0" layoutY="21.0" text="Modificati Parola Administratorului:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <Label layoutX="38.0" text="ADMIN" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

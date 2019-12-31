@@ -38,6 +38,9 @@ public class TemaRepository extends AbstracBaseRepository<String, Tema> {
 
     private void parseLine(String o) {
         String[] data=o.split(";");
+        if(data.length != 5){
+            return;
+        }
         String id = data[0];
         String nume = data[1];
         String descriere = data[2];

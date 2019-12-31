@@ -88,8 +88,8 @@ public class StructuraSemestru {
      * @return true if the date given is in holiday and false if not.
      */
     public boolean isHoliday(String date) {
-        return Constants.firstDateIsGreaterThanSecondDate(this.endHolyday.format(Constants.DATE_TIME_FORMATTER), date) &&
-                Constants.firstDateIsGreaterThanSecondDate(date, this.beginHolyday.format(Constants.DATE_TIME_FORMATTER));
+        return Constants.compareDates(this.endHolyday.format(Constants.DATE_TIME_FORMATTER), date) &&
+                Constants.compareDates(date, this.beginHolyday.format(Constants.DATE_TIME_FORMATTER));
     }
 
     /**
@@ -97,8 +97,8 @@ public class StructuraSemestru {
      * @return true if date is before holiday and after semester start
      */
     public boolean isFirstPartOfSemester(String date) {
-        return Constants.firstDateIsGreaterThanSecondDate(this.beginHolyday.format(Constants.DATE_TIME_FORMATTER), date) &&
-                Constants.firstDateIsGreaterThanSecondDate(date, this.startSemester.format(Constants.DATE_TIME_FORMATTER));
+        return Constants.compareDates(this.beginHolyday.format(Constants.DATE_TIME_FORMATTER), date) &&
+                Constants.compareDates(date, this.startSemester.format(Constants.DATE_TIME_FORMATTER));
     }
 
     /**
@@ -106,8 +106,8 @@ public class StructuraSemestru {
      * @return true if date is after holiday and before semester end
      */
     public boolean isLastPartOfSemester(String date) {
-        return Constants.firstDateIsGreaterThanSecondDate(this.endSemester.format(Constants.DATE_TIME_FORMATTER), date) &&
-                Constants.firstDateIsGreaterThanSecondDate(date, this.endHolyday.format(Constants.DATE_TIME_FORMATTER));
+        return Constants.compareDates(this.endSemester.format(Constants.DATE_TIME_FORMATTER), date) &&
+                Constants.compareDates(date, this.endHolyday.format(Constants.DATE_TIME_FORMATTER));
     }
 
     public int getAnUniversitar() {
@@ -129,22 +129,22 @@ public class StructuraSemestru {
         int start = Constants.getWeek(semStart);
         start -= 1;//because mathematics tell us that the number of weeks between j and i equals i - j + 1
 
-        if (Constants.firstDateIsGreaterThanSecondDate(semStart, stringNow)) {//semester not started yet
+        if (Constants.compareDates(semStart, stringNow)) {//semester not started yet
             //EXCEPTION : SEMESTER NOT STARTED YET
             return -1;
         } else {//semester started
-            if (Constants.firstDateIsGreaterThanSecondDate(vacStart, stringNow)) {//holiday not started yet
+            if (Constants.compareDates(vacStart, stringNow)) {//holiday not started yet
                 int date = Constants.getWeek(LocalDateTime.now());
                 date -= start;
                 return date;
             } else {//now is after holiday start
-                if (Constants.firstDateIsGreaterThanSecondDate(vacEnd, stringNow)) {//now is in holiday
+                if (Constants.compareDates(vacEnd, stringNow)) {//now is in holiday
                     int date = Constants.getWeek(vacStart);
                     date += 1;//first task after holiday has the name counter equals to the last task name counter before holiday + 1
                     date -= start;
                     return date;
                 } else {//holiday finished
-                    if (Constants.firstDateIsGreaterThanSecondDate(semEnd, stringNow)) {//semester ended
+                    if (Constants.compareDates(semEnd, stringNow)) {//semester ended
                         //EXCEPTION : SEMESTER FINISHED ALREADY
                         return -1;
                     } else {//in semester after holiday

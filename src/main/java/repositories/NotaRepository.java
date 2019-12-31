@@ -39,6 +39,9 @@ public class NotaRepository extends AbstracBaseRepository<String, Nota> {
 
     private void parseLine(String o) {
         String[] data=o.split(";");
+        if(data.length != 5){
+            return;
+        }
         String id = data[0];
         String date = data[1];
         String profesor = data[2];

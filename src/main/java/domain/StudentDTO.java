@@ -1,6 +1,8 @@
 package domain;
 
 public class StudentDTO {
+    private Student student;
+
     private String id;
     private String nume;
     private String prenume;
@@ -9,13 +11,14 @@ public class StudentDTO {
     private String cadruDidacticIndrumatorLab;
     private String password;
 
-    public StudentDTO(String id, String nume, String prenume, int grupa, String email, String cadruDidacticIndrumatorLab, String password) {
-        this.id = id;
-        this.nume = nume;
-        this.prenume = prenume;
-        this.grupa = grupa;
-        this.email = email;
-        this.cadruDidacticIndrumatorLab = cadruDidacticIndrumatorLab;
+    public StudentDTO(Student student, String password) {
+        this.student = student;
+        this.id = student.getId();
+        this.nume = student.getNume();
+        this.prenume = student.getPrenume();
+        this.grupa = student.getGrupa();
+        this.email = student.getEmail();
+        this.cadruDidacticIndrumatorLab = student.getCadruDidacticIndrumatorLab();
         this.password = password;
     }
 
@@ -73,5 +76,13 @@ public class StudentDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
     }
 }

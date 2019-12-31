@@ -1,72 +1,112 @@
 package services;
 
-import domain.Nota;
-import domain.Profesor;
-import domain.Student;
-import domain.Tema;
-import utils.Constants;
-import utils.events.ChangeEventType;
-import utils.events.GradeChangeEvent;
+import domain.*;
+import utils.events.*;
+import utils.observer.*;
 import utils.observer.Observable;
 import utils.observer.Observer;
 import validators.ValidationException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-public class MasterService implements Observable<GradeChangeEvent> {
+//public class MasterService implements Observable<GradeChangeEvent> {
+public class MasterService implements ObservableGrade, ObservableTask, ObservableStudent, ObservableProfesor {
     private ProfesorService profesorService = null;
     private StudentService studentService = null;
     private TemaService temaService = null;
     private NotaService notaService = null;
-    private List<Observer<GradeChangeEvent>> observers = new ArrayList<>();
+    private MotivationService motivationService = null;
+    private LoginCredentialsProxy loginCredentialsProxy = null;
+    //private List<Observer<GradeChangeEvent>> observers = new ArrayList<>();
+    private List<GradeObserver> gradeObservers = new ArrayList<>();
+    private List<TaskObserver> taskObservers = new ArrayList<>();
+    private List<StudentObserver> studentObservers = new ArrayList<>();
+    private List<ProfesorObserver> profObservers = new ArrayList<>();
 
-    public MasterService(ProfesorService profesorService, StudentService studentService, TemaService temaService, NotaService notaService) {//TODO as putea face un service comunn,
+    public MasterService(ProfesorService profesorService, StudentService studentService, TemaService temaService, NotaService notaService, MotivationService motivationService) {
         this.profesorService = profesorService;
         this.studentService = studentService;
         this.temaService = temaService;
         this.notaService = notaService;
-    }
-    //TODO: pentru baza de date nu mai pun id la student/tema, ci direct referinte la obiecte
+        this.motivationService = motivationService;
+        this.loginCredentialsProxy = new LoginCredentialsProxy(profesorService, studentService);
 
-
-    public String getStudentPassword(Student student){
-        for (String line : getPSSWDContent()) {
-            String[] components = line.split(":");
-            if(components.length != 0 && components[0].equals("student") && components[3].equals(student.getId()))
-                return components[2];
-        }
-        return null;
     }
 
-    public String getProfesorPassword(Profesor profesor){
-        for (String line : getPSSWDContent()) {
-            String[] components = line.split(":");
-            if(components.length != 0 && components[0].equals("profesor") && components[3].equals(profesor.getId()))
-                return components[2];
-        }
-        return null;
+
+    public void deleteAllGradesOfStudent(Student student){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .forEach(x -> this.removeByIdNota(x.getId()));
     }
 
-    public String getAdminPassword(){
-        for (String line : getPSSWDContent()) {
-            String[] components = line.split(":");
-            if(components.length != 0 && components[0].equals("admin"))
-                return components[2];
+    public void deleteAllGradesOfTema(Tema tema){
+        List<Nota> tbd = StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[1].equals(tema.getId()))
+                .collect(Collectors.toList());
+        //tbd.stream()
+        //        .forEach(x -> this.removeByIdNota(x.getId())); - TODO: won't work due to modifications on the fly
+        for (Nota n : tbd) {
+            this.removeByIdNota(n.getId());
         }
-        return null;
+    }
+
+    public void deleteAllStudentsANDGradesOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .forEach(x -> this.removeByIdStudent(x.getId()));
+        deleteAllGradesOfProfesor(profesor);
+    }
+
+    private void deleteAllGradesOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))
+                .forEach(x -> this.removeByIdNota(x.getId()));
+    }
+
+
+    public void updateAllGradesOfStudent(Student student){
+        //nu exista update la grade (nota are numai id-ul) - este complicat de zic ca ar avea sens sa schimbi profesorul care a dat nota pe tema... e teoretic imposibil sa se schimbe proful...
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .forEach(x -> this.updateNota(new Nota(student.getId()+":"+x.getId().split(":")[1],x.getValoare(),student.getCadruDidacticIndrumatorLab(),x.getData(),x.getFeedback())));
+    }
+
+    public void updateAllGradesOfTema(Tema tema){
+        //teoretic, daca nu am schimba id-ul temei, nu ar avea sens update-ul...
+        StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
+                .filter(x -> x.getId().split(":")[1].equals(tema.getId()))
+                .forEach(x -> this.updateNota(new Nota(x.getId().split(":")[0]+":"+tema.getId(),x.getValoare(),x.getProfesor(),x.getData(),x.getFeedback())));
+    }
+
+    public void updateAllStudentsOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .forEach(x -> this.updateStudent(new Student(x.getId(),x.getNume(),x.getPrenume(),x.getGrupa(),x.getEmail(),profesor.toString())));
+        updateAllGradesOfProfesor(profesor);
+    }
+
+    public void updateAllGradesOfProfesor(Profesor profesor){
+        StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))
+                .forEach(x -> this.updateNota(new Nota(x.getId(),x.getValoare(),profesor.toString(),x.getData(),x.getFeedback())));
     }
 
 
@@ -79,205 +119,122 @@ public class MasterService implements Observable<GradeChangeEvent> {
     }
 
     public Profesor addProfesor(Profesor entity) throws ValidationException {
-        return profesorService.add(entity);
+        Profesor r = profesorService.add(entity);
+        if(r == null) {
+            notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.ADD, entity));
+        }
+        return r;
     }
 
     public Profesor removeByIdProfesor(String s) {
-        return profesorService.removeById(s);
+        Profesor r = profesorService.removeById(s);
+        if(r != null) {
+            notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.DELETE, r));
+        }
+        return r;
     }
 
     public Profesor updateProfesor(Profesor newEntity) {
-        return profesorService.update(newEntity);
+        Profesor oldProf = profesorService.findById(newEntity.getId());
+        Profesor res = profesorService.update(newEntity);
+        if(res == null) {
+            notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.UPDATE, newEntity, oldProf));
         }
+        return res;
+    }
 
 
 
 
+    public Motivation findByIdMotivation(String s) {
+        return motivationService.findById(s);
+    }
+
+    public Iterable<Motivation> getAllMotivation() {
+        return motivationService.getAll();
+    }
+
+    public Motivation addMotivation(Motivation entity) throws ValidationException {
+        return motivationService.add(entity);
+    }
+
+    public Motivation removeByIdMotivation(String s) {
+        return motivationService.removeById(s);
+    }
+
+    public Motivation updateMotivation(Motivation newEntity) {
+        return motivationService.update(newEntity);
+    }
+
+
+
+
+
+    public String getStudentPassword(Student student){
+        return this.loginCredentialsProxy.getStudentPassword(student);
+    }
+
+    public String getProfesorPassword(Profesor profesor){
+        return this.loginCredentialsProxy.getProfesorPassword(profesor);
+    }
+
+    public String getAdminPassword(){
+        return this.loginCredentialsProxy.getAdminPassword();
+    }
 
     public boolean changeStudentPassword(String user, String oldp, String newp){
-
-        Student student = findStudentByCredentials(user,oldp);
-        if(student == null){
-            return false;
-        }
-        else{
-            String oldLine = "student:"+user+":"+oldp+":"+student.getId();
-            String newLine = "student:"+user+":"+newp+":"+student.getId();
-            changeLinePSSWD(oldLine,newLine);
-            return true;
-        }
+        return this.loginCredentialsProxy.changeStudentPassword(user, oldp, newp);
     }
 
     public boolean changeProfessorPassword(String user, String oldp, String newp){
-
-        Profesor profesor = findProfessorByCredentials(user,oldp);
-        if(profesor == null){
-            return false;
-        }
-        else{
-            String oldLine = "profesor:"+user+":"+oldp+":"+profesor.getId();
-            String newLine = "profesor:"+user+":"+newp+":"+profesor.getId();
-            changeLinePSSWD(oldLine,newLine);
-            return true;
-        }
+        return this.loginCredentialsProxy.changeProfessorPassword(user, oldp, newp);
     }
 
     public boolean changeAdminPassword(String newp){
-        String oldp = getAdminPassword();
-        String oldLine = "admin:"+""+":"+oldp+":"+"0";
-        String newLine = "admin:"+""+":"+newp+":"+"0";
-        changeLinePSSWD(oldLine,newLine);
-        return true;
+        return this.loginCredentialsProxy.changeAdminPassword(newp);
     }
-
-
-
 
     public void changeLinePSSWD(String oldLine, String newLine){
-
-        Path path = Paths.get("data/PSSWD.txt");
-        List<String> lines = getPSSWDContent();
-
-
-        try {
-            File file = new File("data/PSSWD.txt");
-            PrintWriter writer = new PrintWriter(file);
-            writer.print("");
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-
-        try{
-            List<String> empty = new ArrayList<>();
-            Files.write(path, empty, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<String> modifiedLines = new ArrayList<>();
-
-        assert lines != null;//TODO: LINES MAY BE NULL IS FILE DOES NOT OPEN PROPERLY
-
-        for (String line : lines) {
-            if(line.equals(oldLine)){
-                modifiedLines.add(newLine);
-            }
-            else{
-                modifiedLines.add(line);
-            }
-        }
-
-        try {
-            Files.write(path, modifiedLines, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private List<String> getPSSWDContent() {
-        Path path = Paths.get("data/PSSWD.txt");
-        try {
-            return Files.readAllLines(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        this.loginCredentialsProxy.changeLinePSSWD(oldLine, newLine);
     }
 
 
-
-    private Student getStudentFromPSSWD(String line) {
-        String[] data = line.split(":");
-        if (data.length != 4) {
-            return null;
-        }
-        String id = data[3];
-        return this.studentService.findById(id);
+    public void addStudentPSSWD(Student student, String psswd){
+        this.loginCredentialsProxy.addStudentPSSWD(student, psswd);
     }
 
-    private Profesor getProfessorFromPSSWD(String line) {
-        String[] data = line.split(":");
-        if (data.length != 4) {
-            return null;
-        }
-        String id = data[3];
-        return this.profesorService.findById(id);
+    public void addProfesorPSSWD(Profesor profesor, String psswd){
+        this.loginCredentialsProxy.addProfesorPSSWD(profesor, psswd);
+    }
+
+    public void updateStudentPSSWD(Student student, String psswd){
+        this.loginCredentialsProxy.updateStudentPSSWD(student, psswd);
+    }
+
+    public void updateProfesorPSSWD(Profesor profesor, String psswd){
+        this.loginCredentialsProxy.updateProfesorPSSWD(profesor, psswd);
     }
 
 
-
-    private boolean matchLineStudent(String line, String usr, String psswd) {
-        String[] data = line.split(":");
-        if (data.length != 4) {
-            return false;
-        }
-        String type = data[0];
-        String username = data[1];
-        String password = data[2];
-        //String id = data[3]; - we don't use it now
-        return type.equals("student") && usr.equals(username) && psswd.equals(password);
+    public void deleteStudentPSSWD(Student student){
+        this.loginCredentialsProxy.deleteStudentPSSWD(student);
     }
 
-    private boolean matchLineProfessor(String line, String usr, String psswd){
-        String[] data = line.split(":");
-        if (data.length != 4) {
-            return false;
-        }
-        String type = data[0];
-        String username = data[1];
-        String password = data[2];
-        //String id = data[3]; - we don't use it now
-        return type.equals("profesor") && usr.equals(username) && psswd.equals(password);
+    public void deleteProfesorPSSWD(Profesor profesor){
+        this.loginCredentialsProxy.deleteProfesorPSSWD(profesor);
     }
-
-    private boolean matchLineAdmin(String line, String psswd){
-        String[] data = line.split(":");
-        if (data.length != 4) {
-            return false;
-        }
-        String type = data[0];
-        String username = data[1];
-        String password = data[2];
-        //String id = data[3]; - we don't use it now
-        return type.equals("admin") && psswd.equals(password);
-    }
-
 
 
     public Student findStudentByCredentials(String usr, String psswd){
-        List<String> lines = getPSSWDContent();
-        if(lines != null){
-            List<String> found = lines.stream().filter(line -> matchLineStudent(line, usr, psswd)).collect(Collectors.toList());
-            if(found.size() == 0)
-                return null;
-            else
-                return getStudentFromPSSWD(found.get(0));
-        }
-        else{
-            return null;
-        }
+        return this.loginCredentialsProxy.findStudentByCredentials(usr, psswd);
     }
 
     public Profesor findProfessorByCredentials(String usr, String psswd){
-        List<String> lines = getPSSWDContent();
-        if(lines != null){
-            List<String> found = lines.stream().filter(line -> matchLineProfessor(line, usr, psswd)).collect(Collectors.toList());
-            if(found.size() == 0)
-                return null;
-            else
-                return getProfessorFromPSSWD(found.get(0));
-        }
-        else{
-            return null;
-        }
+        return this.loginCredentialsProxy.findProfessorByCredentials(usr, psswd);
     }
 
     public boolean findAdminByCredentials(String password) {
-        List<String> list = this.getPSSWDContent();
-        assert list != null;//TODO: list of lines must not be null (might never be though; else file is broken)
-        return list.stream().anyMatch(x -> matchLineAdmin(x, password));
+        return this.loginCredentialsProxy.findAdminByCredentials(password);
     }
 
 
@@ -297,12 +254,27 @@ public class MasterService implements Observable<GradeChangeEvent> {
     public Iterable<Student> getAllStudent() {
         return studentService.getAll();
     }
-    public Student addStudent(Student entity) throws ValidationException { return studentService.add(entity); }
-    public Student removeByIdStudent(String s) {
-        return studentService.removeById(s);
+    public Student addStudent(Student entity) throws ValidationException {
+        Student r = studentService.add(entity);
+        if(r == null) {
+            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.ADD, entity));
+        }
+        return r;
     }
-    public Student updateStudent(Student entity) {
-        return studentService.update(entity);
+    public Student removeByIdStudent(String s) {
+        Student r = studentService.removeById(s);
+        if(r != null) {
+            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.DELETE, r));
+        }
+        return r;
+    }
+    public Student updateStudent(Student newEntity) {
+        Student oldStudent = studentService.findById(newEntity.getId());
+        Student res = studentService.update(newEntity);
+        if(res == null) {
+            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.UPDATE, newEntity, oldStudent));
+        }
+        return res;
     }
 
 
@@ -312,176 +284,56 @@ public class MasterService implements Observable<GradeChangeEvent> {
     public Iterable<Tema> getAllTema() {
         return temaService.getAll();
     }
-    public Tema addTema(Tema entity) throws ValidationException { return temaService.add(entity); }
-    public Tema removeByIdTema(String s) {
-        return temaService.removeById(s);
-    }
-    public Tema updateTema(Tema entity) {
-        return temaService.update(entity);
-    }
-
-
-
-    //TODO: pentru nota service , voi lua toate informatiile despre studenti si teme, pentru a gasi datele fara sa avem un service in care sa grupam totul
-    public Nota findByIdNota(String s) { return notaService.findById(s); }
-    public Iterable<Nota> getAllNota() { return notaService.getAll(); }
-    public Nota addNota(Nota entity) throws ValidationException {
-        Nota r = notaService.add(entity);
+    public Tema addTema(Tema entity) throws ValidationException {
+        Tema r = temaService.add(entity);
         if(r == null) {
-            notifyObservers(new GradeChangeEvent(ChangeEventType.ADD, entity));
+            notifyObserversTask(new TaskChangeEvent(ChangeEventType.ADD, entity));
         }
         return r;
     }
-    public Nota removeByIdNota(String s) {
-        //return notaService.removeById(s);
-        Nota r = notaService.removeById(s);
+    public Tema removeByIdTema(String s) {
+        Tema r = temaService.removeById(s);
         if(r != null) {
-            notifyObservers(new GradeChangeEvent(ChangeEventType.DELETE, r));
+            notifyObserversTask(new TaskChangeEvent(ChangeEventType.DELETE, r));
         }
         return r;
     }
-    public Nota updateNota(Nota newEntity) {
-        //return notaService.update(entity);
-        Nota oldStudent = notaService.findById(newEntity.getId());
-        Nota res = notaService.update(newEntity);
+    public Tema updateTema(Tema newEntity) {
+        Tema oldTask = temaService.findById(newEntity.getId());
+        Tema res = temaService.update(newEntity);
         if(res == null) {
-            notifyObservers(new GradeChangeEvent(ChangeEventType.UPDATE, newEntity, oldStudent));
+            notifyObserversTask(new TaskChangeEvent(ChangeEventType.UPDATE, newEntity, oldTask));
         }
         return res;
     }
 
 
 
-    public int getWeekNow(){
-        String input = LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER);
-        String format = "yyyy/MM/dd";
-        SimpleDateFormat df = new SimpleDateFormat(format);
-        Date date;
-        int current;
-        try {
-            date = df.parse(input);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            current = cal.get(Calendar.WEEK_OF_YEAR);
-        } catch (ParseException e) {
-            current = -1;
+    public Nota findByIdNota(String s) { return notaService.findById(s); }
+    public Iterable<Nota> getAllNota() { return notaService.getAll(); }
+    public Nota addNota(Nota entity) throws ValidationException {
+        Nota r = notaService.add(entity);
+        if(r == null) {
+            notifyObserversGrade(new GradeChangeEvent(ChangeEventType.ADD, entity));
         }
-        return current;
+        return r;
     }
-
-    public int getDelayForTaskNow(String tid){
-        Tema t = this.temaService.findById(tid);
-        int current = getWeekNow();
-        int deadline = getWeekByDate(t.getDeadlineWeek());
-        return Math.max(0, current - deadline);
-    }
-
-    public int getMaxGradeNow(String tid){
-        int delay = getDelayForTaskNow(tid);
-        return 10 - delay;
-    }
-
-
-
-
-
-
-
-
-    /**
-     * input must be a - String input = LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER) - type of string
-     */
-    public int getWeekByDate(String input){
-        String format = "yyyy/MM/dd";
-        SimpleDateFormat df = new SimpleDateFormat(format);
-        Date date;
-        int current;
-        try {
-            date = df.parse(input);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            current = cal.get(Calendar.WEEK_OF_YEAR);
-        } catch (ParseException e) {
-            current = -1;
+    public Nota removeByIdNota(String s) {
+        Nota r = notaService.removeById(s);
+        if(r != null) {
+            notifyObserversGrade(new GradeChangeEvent(ChangeEventType.DELETE, r));
         }
-        return current;
+        return r;
     }
-
-    public int getDelayForTaskByDate(String tid, String date){
-        Tema t = this.temaService.findById(tid);
-        int current = getWeekByDate(date);
-        int deadline = getWeekByDate(t.getDeadlineWeek());
-        return Math.max(0, current - deadline);
-    }
-
-    public int getMaxGradeByDate(String tid, String date){
-        int delay = getDelayForTaskByDate(tid, date);
-        return 10 - delay;
-    }
-
-    public int getMaxGradeByDelay(int delay){
-        return Math.max(10-delay,0);
-    }
-
-    public int getActualDelay(int delay){
-        //check if task was handed in sooner than deadline.
-        return Math.max(delay,0);
-    }
-
-    public boolean isGradeStillAvailableToHandInNow(String tid){
-        Tema t = temaService.findById(tid);
-        int week = getWeekNow();
-        int delay = getWeekByDate(t.getDeadlineWeek()) - week;
-        return isDelayOverdue(delay);
-    }
-
-    public boolean isDelayOverdue(int delay){
-        return delay > 2;
-    }
-
-
-
-
-
-
-
-
-    public void addGradePlusChecks(String sid, String tid, int valoare, String profesor, String feedback){
-        Nota nota = new Nota(sid,tid,valoare,profesor);
-        //TODO: check if proffessor exists (later)
-
-        boolean foundStudent = false;
-        boolean foundTask = false;
-
-        for (Student st : this.studentService.getAll()) {
-            if(st.getId().equals(nota.getId().split(":")[0])){
-                foundStudent = true;
-                break;
-            }
+    public Nota updateNota(Nota newEntity) {
+        Nota oldGrade = notaService.findById(newEntity.getId());
+        Nota res = notaService.update(newEntity);
+        if(res == null) {
+            notifyObserversGrade(new GradeChangeEvent(ChangeEventType.UPDATE, newEntity, oldGrade));
         }
-
-        for (Tema st : this.temaService.getAll()) {
-            if(st.getId().equals(nota.getId().split(":")[1])){
-                foundTask = true;
-                break;
-            }
-        }
-
-        String exception = "";//TODO : ? extract validation class ?
-        if(!foundStudent){
-            exception += "THE STUDENT DOES NOT EXIST IN THE DATABASE!";
-        }
-        if(!foundTask){
-            exception += "THE TASK DOES NOT EXIST IN THE DATABASE!";
-        }
-        if(exception.length() > 0){
-            throw new ValidationException(exception);
-        }
-
-        notaService.add(nota);
-
-        writeToFile(nota,feedback);
+        return res;
     }
+
 
 
     private void writeToFile(Nota nota, String feedback){
@@ -511,88 +363,66 @@ public class MasterService implements Observable<GradeChangeEvent> {
 
 
 
-    // o 1: Toți studenții unei grupe
-    public List<Student> filterGroup(int grupa) {
-        List<Student> list = new ArrayList<>((Collection<? extends Student>) this.studentService.getAll());
-
-        return list.stream()
-                .filter(x -> x.getGrupa() == grupa)
-                .collect(Collectors.toList());
-    }
-
-
-    // o 2: Toți studenții care au predat o anumita tema
-    public List<Student> filterTaskDone(String tid) {
-        List<Nota> list = new ArrayList<>((Collection<? extends Nota>) this.notaService.getAll());
-
-        return list.stream()
-                .filter(x -> x.getId().split(":")[1].equals(tid))// luam doar temele cautate
-                .map(x -> this.studentService.findById(x.getId().split(":")[0]))// mapam din Nota in Stuednt
-                .collect(Collectors.toList());// colectam rezultatul
-    }
-
-
-    // o 3: Toți studenții care au predat o anumita tema unui profesor anume
-    public List<Student> filterTaskDoneProf(String tid, String prof) {
-        List<Nota> list = new ArrayList<>((Collection<? extends Nota>) this.notaService.getAll());
-
-        /*return list.stream()
-                .filter(x-> x.getProfesor().equals(prof)) // AICI TRIEM LISTA, SA AVEM DOAR PROFESORUL CAUTAT
-                .filter(x -> x.getId().split(":")[1].equals(tid)) // AICI FILTRAM SA AVEM DOAR TEMA CAUTATA
-                .map(x -> new NotaDTO(x.getId().split(":")[1], this.studentService.findById(x.getId().split(":")[0]))) // AICI MAPAM O NOTA INTR-O "PERECHE" <tid,Student>
-                .map(NotaDTO::getS) // AICI MAPAM DIN NotaDTO LA STUDENT (extragem din NotaDTO info utila)
-                .collect(Collectors.toList()); // AICI COLECTAM IN LISTA STUDENTII*/
-        return null;
-    }
-
-
-    // o 4: Toate notele la o anumita tema, dintr-o saptamana data
-    public List<Nota> filterGradesForTaskInWeek(String tid, int week) {
-        List<Nota> list = new ArrayList<Nota>((Collection<? extends Nota>) this.notaService.getAll());
-
-        return list.stream()
-                .filter(x -> x.getId().split(":")[1].equals(tid))//filtram tema
-                .filter(x -> {int v = this.getWeekByDate(x.getData()); return v==week;})//filtram data
-                .collect(Collectors.toList());//colectam notele din rezultat
-    }
-
-
-
-    /*public Map<Student, Integer> raport1(){
-        Iterable<Nota> grades = notaService.getAll();
-        List<NotaDTO> gradeList = StreamSupport.stream(grades.spliterator(), false)
-                .map(x -> new NotaDTO(x, temaService.findById(x.getId().split(":")[1]), studentService.findById(x.getId().split(":")[0])))
-                .collect(Collectors.toList());
-
-        Map<Student,List<NotaDTO>> grouped = gradeList.stream()
-                .collect(Collectors.groupingBy(NotaDTO::getS));
-
-
-        grouped.values().stream()//TODO: get weighted average (weights represent week count / task)
-                .map(notaDTOS -> {//there are 14 weeks / semester
-                    double medie = notaDTOS.stream()
-                            .map(x -> x.getValoare() * ((Constants.getWeek(x.getDeadlineTema()) - Constants.getWeek(x.getStartTema())) / 14))
-                            .reduce(0, Integer::sum);
-                }).collect(Collectors.toList());//TODO: lista de note - trebuie eventual imperecheate -!!! CU UN NOU DTO !!!- pentru a putea afisa un raport al studentilor + mediilor lor.
-        //TODO:     .map( new DTOnou(Student, mediedouble).collect(Collectors.toList());
-    }*/
 
 
     @Override
-    public void addObserver(Observer<GradeChangeEvent> e) {
-        observers.add(e);
+    public void addObserverGrade(GradeObserver e) {
+        gradeObservers.add(e);
     }
 
     @Override
-    public void removeObserver(Observer<GradeChangeEvent> e) {
-        observers.remove(e);
+    public void removeObserverGrade(GradeObserver e) {
+        gradeObservers.remove(e);
     }
 
     @Override
-    public void notifyObservers(GradeChangeEvent t) {
-        observers.forEach(x->x.update(t));
+    public void notifyObserversGrade(GradeChangeEvent t) {
+        gradeObservers.forEach(x->x.updateGrade(t));
     }
 
+    @Override
+    public void addObserverStudent(StudentObserver e) {
+        studentObservers.add(e);
+    }
 
+    @Override
+    public void removeObserverStudent(StudentObserver e) {
+        studentObservers.remove(e);
+    }
+
+    @Override
+    public void notifyObserversStudent(StudentChangeEvent t) {
+        studentObservers.forEach(x->x.updateStudent(t));
+    }
+
+    @Override
+    public void addObserverTask(TaskObserver e) {
+        taskObservers.add(e);
+    }
+
+    @Override
+    public void removeObserverTask(TaskObserver e) {
+        taskObservers.remove(e);
+    }
+
+    @Override
+    public void notifyObserversTask(TaskChangeEvent t) {
+        taskObservers.forEach(x->x.updateTask(t));
+    }
+
+    @Override
+    public void addObserverProf(ProfesorObserver e) {
+        profObservers.add(e);
+    }
+
+    @Override
+    public void removeObserverProf(ProfesorObserver e) {
+        profObservers.remove(e);
+    }
+
+    @Override
+    public void notifyObserversProf(ProfesorChangeEvent t) {
+        profObservers.forEach(x->x.updateProf(t));
+    }
 }
 

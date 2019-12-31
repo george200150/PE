@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.ProfessorAccountController">
+   <children>
+      <TabPane layoutX="60.0" layoutY="56.0" prefHeight="1024.0" prefWidth="1920.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <tabs>
+          <Tab text="Studenti">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="49.0" layoutY="26.0" text="Vizualizati studentii existenti:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <TableView fx:id="tableStudent" layoutX="91.0" layoutY="58.0" prefHeight="801.0" prefWidth="1083.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
+                          <columns>
+                            <TableColumn fx:id="columnStudentNume" prefWidth="291.0" text="Nume" />
+                              <TableColumn fx:id="columnStudentPrenume" prefWidth="298.0" text="Prenume" />
+                              <TableColumn fx:id="columnStudentGrupa" prefWidth="126.0" text="Grupa" />
+                              <TableColumn fx:id="columnStudentEmail" prefWidth="244.0" text="Email" />
+                          </columns>
+                        </TableView>
+                        <TextField fx:id="textStudentNume" layoutX="1118.0" layoutY="136.0" AnchorPane.topAnchor="150.0" />
+                        <Label layoutX="1053.0" layoutY="154.0" text="Nume" AnchorPane.topAnchor="154.0" />
+                        <TextField fx:id="textStudentPrenume" layoutX="1118.0" layoutY="237.0" AnchorPane.topAnchor="200.0" />
+                        <Label layoutX="1053.0" layoutY="204.0" text="Prenume" AnchorPane.topAnchor="204.0" />
+                        <TextField fx:id="textStudentGrupa" layoutX="1118.0" layoutY="273.0" AnchorPane.topAnchor="250.0" />
+                        <Label layoutX="1053.0" layoutY="254.0" text="Grupa" AnchorPane.topAnchor="254.0" />
+                        <TextField fx:id="textStudentEmail" layoutX="1118.0" layoutY="298.0" AnchorPane.topAnchor="300.0" />
+                        <Label layoutX="1053.0" layoutY="304.0" text="Email" AnchorPane.topAnchor="304.0" />
+                        <Button layoutX="1068.0" layoutY="414.0" mnemonicParsing="false" onAction="#handleClearFieldsStudent" text="Resetare" />
+                        <Button layoutX="1152.0" layoutY="414.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Teme">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="56.0" layoutY="24.0" text="Vizualizati temele existente:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <TableView fx:id="tableTema" layoutX="101.0" layoutY="52.0" prefHeight="801.0" prefWidth="1166.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
+                          <columns>
+                            <TableColumn fx:id="tableTemaNume" prefWidth="223.0" text="Nume" />
+                              <TableColumn fx:id="tableTemaDescriere" prefWidth="364.0" text="Descriere" />
+                              <TableColumn fx:id="tableTemaInceput" prefWidth="169.0" text="Inceput" />
+                              <TableColumn fx:id="tableTemaSfarsit" prefWidth="203.0" text="Sfarsit" />
+                          </columns>
+                        </TableView>
+                        <Label layoutX="1067.0" layoutY="341.0" text="Sfarsit" />
+                        <Label layoutX="1067.0" layoutY="240.0" text="Nume" />
+                        <TextField fx:id="textTemaNume" layoutX="1126.0" layoutY="236.0" />
+                        <Label layoutX="1067.0" layoutY="273.0" text="Descriere" />
+                        <TextField fx:id="textTemaDescriere" layoutX="1126.0" layoutY="269.0" />
+                        <Label layoutX="1067.0" layoutY="307.0" text="Inceput" />
+                        <Button layoutX="1066.0" layoutY="426.0" mnemonicParsing="false" onAction="#handleClearFieldsTema" text="Resetare" />
+                        <Button layoutX="1139.0" layoutY="426.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                        <TextField fx:id="dateTemaInceput" layoutX="1126.0" layoutY="303.0" />
+                        <TextField fx:id="dateTemaSfarsit" layoutX="1126.0" layoutY="337.0" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+            <Tab text="Note">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="27.0" layoutY="14.0" text="Vizualizati si gestionati notele studentilor:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <TableView fx:id="tableNota" layoutX="15.0" layoutY="153.0" onMouseClicked="#handleSelectionChanged" prefHeight="801.0" prefWidth="960.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
+                          <columns>
+                              <TableColumn fx:id="columnNotaId" prefWidth="75.0" text="ID" />
+                              <TableColumn fx:id="columnNotaStudent" prefWidth="183.0" text="Student" />
+                              <TableColumn fx:id="columnNotaTema" prefWidth="165.0" text="Tema" />
+                            <TableColumn fx:id="columnNotaData" prefWidth="102.0" text="Data" />
+                              <TableColumn fx:id="columnNotaProfesor" prefWidth="161.0" text="Profesor" />
+                              <TableColumn fx:id="columnNotaValoare" prefWidth="65.0" text="Valoare" />
+                              <TableColumn fx:id="columnNotaFeedback" prefWidth="208.0" text="Feedback" />
+                          </columns>
+                        </TableView>
+                        <Label layoutX="1068.0" layoutY="315.0" text="Profesor" />
+                        <Label layoutX="1068.0" layoutY="190.0" text="Student" />
+                        <Label layoutX="1068.0" layoutY="274.0" text="Data" />
+                        <Label layoutX="1068.0" layoutY="228.0" text="Tema" />
+                        <TextField fx:id="textNotaStudent" layoutX="1117.0" layoutY="186.0" />
+                        <TextField fx:id="textNotaTema" layoutX="1117.0" layoutY="224.0" />
+                        <TextField fx:id="textNotaFeedback" layoutX="1121.0" layoutY="394.0" />
+                        <TextField fx:id="textNotaValoare" layoutX="1121.0" layoutY="349.0" />
+                        <TextField fx:id="textNotaProf" editable="false" layoutX="1121.0" layoutY="311.0" />
+                        <DatePicker fx:id="dateNotaData" layoutX="1119.0" layoutY="270.0" />
+                        <CheckBox fx:id="checkboxInvert" layoutX="1132.0" layoutY="91.0" mnemonicParsing="false" onAction="#handleToggleINVERT" text="Schimbati modul de editare" />
+                        <Button layoutX="1033.0" layoutY="488.0" mnemonicParsing="false" onAction="#handleAddNota" text="Adauga" />
+                        <Button layoutX="1099.0" layoutY="488.0" mnemonicParsing="false" onAction="#handleDeleteNota" text="Sterge" />
+                        <Button layoutX="1153.0" layoutY="488.0" mnemonicParsing="false" onAction="#handleUpdateNota" text="Modifica" />
+                        <Label layoutX="1067.0" layoutY="353.0" text="Valoare" />
+                        <Label layoutX="1062.0" layoutY="398.0" text="Feedback" />
+                        <Button layoutX="1223.0" layoutY="488.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                        <Label layoutX="1065.0" layoutY="153.0" text="ID" />
+                        <TextField fx:id="textNotaId" layoutX="1115.0" layoutY="149.0" />
+                        <Label layoutX="985.0" layoutY="50.0" text="Info: modul de editare se refera la ce drepturi de actiune aveti asupra datelor din tabela" />
+                        <Label layoutX="1003.0" layoutY="67.0" text="pentru a sterge sau modifica lasati casuta debifata; pentru a adauga bifati casuta" />
+                        <Button layoutX="1332.0" layoutY="488.0" mnemonicParsing="false" onAction="#handleClearFieldsNota" text="Reseteaza" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="Rapoarte">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="35.0" layoutY="14.0" text="Generati si salvati rapoarte despre performanta studentilor:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="Resetare Parola">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="58.0" layoutY="14.0" text="Resetati parola dumneavoastra:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="836.0" layoutY="124.0" text="Parola veche:" />
+                        <Label layoutX="838.0" layoutY="168.0" text="Parola noua:" />
+                        <Button layoutX="861.0" layoutY="223.0" mnemonicParsing="false" onAction="#handleResetPassword" text="Reseteaza" />
+                        <Button layoutX="965.0" layoutY="223.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                        <PasswordField fx:id="textOldPassword" layoutX="936.0" layoutY="120.0" />
+                        <PasswordField fx:id="textNewPassword" layoutX="936.0" layoutY="164.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <Label layoutX="25.0" text="PROFESOR" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+      <Label fx:id="labelProfesor" layoutX="256.0" text="NULL" AnchorPane.leftAnchor="250.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

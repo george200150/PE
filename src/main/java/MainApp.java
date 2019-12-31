@@ -1,20 +1,13 @@
-import domain.Nota;
-import domain.Profesor;
-import domain.Student;
-import domain.Tema;
+import domain.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import mvc.ReportController;
-import mvc.backup4new.LoginChoiceController;
+import mvc.controllers.LoginChoiceController;
 import repositories.*;
 import services.*;
-import validators.NotaValidator;
-import validators.ProfesorValidator;
-import validators.StudentValidator;
-import validators.TemaValidator;
+import validators.*;
 
 import java.io.IOException;
 
@@ -29,6 +22,9 @@ public class MainApp extends Application {
 
     private AbstracBaseRepository<String, Profesor> profesorRepository;
     private ProfesorService profesorService;
+
+    private AbstracBaseRepository<String, Motivation> motivationRepository;
+    private MotivationService motivationService;
 
     private MasterService masterService;
 
@@ -51,7 +47,10 @@ public class MainApp extends Application {
         profesorRepository = new ProfesorRepository(ProfesorValidator.getInstance(), "data/PROFESORI.txt");
         profesorService = new ProfesorService(profesorRepository);
 
-        masterService = new MasterService(profesorService, studentService, temaService, notaService);
+        motivationRepository = new MotivationRepository(MotivationValidator.getInstance(),"data/MOTIVARI.txt");
+        motivationService = new MotivationService(motivationRepository);
+
+        masterService = new MasterService(profesorService, studentService, temaService, notaService, motivationService);
 
         init1(primaryStage);
         primaryStage.show();
@@ -62,7 +61,7 @@ public class MainApp extends Application {
     private void init1(Stage primaryStage) throws IOException {
 
         FXMLLoader gradeLoader = new FXMLLoader();
-        gradeLoader.setLocation(getClass().getResource("/views/backup4new/LoginChoice.fxml"));
+        gradeLoader.setLocation(getClass().getResource("/views/login/LoginChoice.fxml"));
         AnchorPane gradeLayout = gradeLoader.load();
         primaryStage.setScene(new Scene(gradeLayout));
 

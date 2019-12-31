@@ -46,7 +46,7 @@ public class Profesor extends Entity<String> {
     }
 
     @Override
-    public String toString() {
+    public String   toString() {
         return nume + " " + prenume;
     }
 }

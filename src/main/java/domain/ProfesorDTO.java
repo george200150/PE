@@ -6,12 +6,14 @@ public class ProfesorDTO {
     private String prenume;
     private String email;
     private String password;
+    private Profesor profesor;
 
-    public ProfesorDTO(String id, String nume, String prenume, String email, String password) {
-        this.id = id;
-        this.nume = nume;
-        this.prenume = prenume;
-        this.email = email;
+    public ProfesorDTO(Profesor profesor, String password) {
+        this.profesor = profesor;
+        this.id = profesor.getId();
+        this.nume = profesor.getNume();
+        this.prenume = profesor.getPrenume();
+        this.email = profesor.getEmail();
         this.password = password;
     }
 
@@ -53,5 +55,13 @@ public class ProfesorDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Profesor getProfesor() {
+        return profesor;
+    }
+
+    public void setProfesor(Profesor profesor) {
+        this.profesor = profesor;
     }
 }
