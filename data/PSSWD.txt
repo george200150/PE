@@ -5,3 +5,5 @@ profesor:nico@cs.ubbcluj.ro:prof:prof:1
 profesor:dascalg@cs.ubbcluj.ro:prof:2
 profesor:gogo@cs.ubbcluj.ro:prof:3
 profesor:w@w.w:w:4
+profesor:gogo@whatever.ro:1234:5
+student:ala@micu.rp:1234:7

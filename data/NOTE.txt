@@ -1,3 +1,4 @@
 2:1;15/10/2019;Profu ';7;am schimbat
 3:1;08/10/2019;Profu ';9;trebuia repo generic
 5:1;08/10/2019;Profu ';10;NICIO OBSERVATIE
+7:1;08/10/2019;Gogoana Tu;10;NICIO OBSERVATIE

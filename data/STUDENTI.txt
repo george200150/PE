@@ -4,3 +4,4 @@
 4;Irimia;Larisa;821;larisika22@yahoo.com;Laptarul Nicolae
 5;Cincinescu;Cinci;555;cinci55@cinci.cinci;Profu '
 6;Lucaci;Ion;345;li@il.lil;Laptarul Nicolae
+7;Vasile;Ilie;111;ala@micu.rp;Gogoana Tu
