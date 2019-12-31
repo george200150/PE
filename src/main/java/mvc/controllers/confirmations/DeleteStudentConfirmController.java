@@ -1,6 +1,6 @@
 package mvc.controllers.confirmations;
 
-import domain.StudentDTO;
+import domain.Student;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
@@ -10,9 +10,9 @@ public class DeleteStudentConfirmController {
 
     private AdminAccountController ctrl;
     private Stage dialogStage;
-    private StudentDTO toBeDeleted;
+    private Student toBeDeleted;
 
-    public void setService(AdminAccountController ctrl, Stage stage, StudentDTO toBeDeleted) {
+    public void setService(AdminAccountController ctrl, Stage stage, Student toBeDeleted) {
         this.ctrl = ctrl;
         this.dialogStage = stage;
         this.toBeDeleted = toBeDeleted;

@@ -459,7 +459,8 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     }
 
     public void handleDeleteStudent(ActionEvent actionEvent) {
-        StudentDTO toBeDeleted = this.tableStudenti.getSelectionModel().getSelectedItem();
+        //StudentDTO toBeDeleted = this.tableStudenti.getSelectionModel().getSelectedItem();
+        Student toBeDeleted = this.service.findByIdStudent(this.textIdStudent.getText());
         if (StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getId().split(":")[0].equals(toBeDeleted.getId()))) {
             try {
                 // create a new stage for the popup dialog.
@@ -488,11 +489,11 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         }
     }
 
-    public void deleteStudentForReal(StudentDTO toBeDeleted) {
+    public void deleteStudentForReal(Student toBeDeleted) {
         Student rez = this.service.removeByIdStudent(toBeDeleted.getId());
         if (rez != null) {
-            this.service.deleteAllGradesOfStudent(toBeDeleted.getStudent());
-            this.service.deleteStudentPSSWD(toBeDeleted.getStudent());
+            this.service.deleteAllGradesOfStudent(toBeDeleted);
+            this.service.deleteStudentPSSWD(toBeDeleted);
             StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "stergere", "studentul a fost sters cu succes!");
         } else {
             StudentAlert.showMessage(null, Alert.AlertType.ERROR, "stergere", "studentul nu a putut fi sters!");
@@ -621,7 +622,8 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
 
 
     public void handleDeleteTema(ActionEvent actionEvent) {
-        Tema toBeDeleted = this.tableTeme.getSelectionModel().getSelectedItem();
+        //Tema toBeDeleted = this.tableTeme.getSelectionModel().getSelectedItem();
+        Tema toBeDeleted = this.service.findByIdTema(this.textIdTema.getText());
         if (StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getId().split(":")[1].equals(toBeDeleted.getId()))){
             try {
                 // create a new stage for the popup dialog.
@@ -692,9 +694,10 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     }
 
     public void handleDeleteProf(ActionEvent actionEvent) {
-        ProfesorDTO toBeDeleted = this.tableProfesori.getSelectionModel().getSelectedItem();
-        if (StreamSupport.stream(this.service.getAllStudent().spliterator(), false).anyMatch(x -> x.getCadruDidacticIndrumatorLab().equals(toBeDeleted.getProfesor().toString())) ||
-                StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getProfesor().equals(toBeDeleted.getProfesor().toString()))
+        //ProfesorDTO toBeDeleted = this.tableProfesori.getSelectionModel().getSelectedItem(); - !!! will reset on selection automatic filter
+        Profesor toBeDeleted = this.service.findByIdProfesor(this.textIdProf.getText());
+        if (StreamSupport.stream(this.service.getAllStudent().spliterator(), false).anyMatch(x -> x.getCadruDidacticIndrumatorLab().equals(toBeDeleted.toString())) ||
+                StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getProfesor().equals(toBeDeleted.toString()))
         ) {
             try {
                 // create a new stage for the popup dialog.
@@ -723,11 +726,11 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         }
     }
 
-    public void deleteProfForReal(ProfesorDTO toBeDeleted){
+    public void deleteProfForReal(Profesor toBeDeleted){
         Profesor rez = this.service.removeByIdProfesor(toBeDeleted.getId());
         if(rez != null){
-            this.service.deleteAllStudentsANDGradesOfProfesor(toBeDeleted.getProfesor());
-            this.service.deleteProfesorPSSWD(toBeDeleted.getProfesor());
+            this.service.deleteAllStudentsANDGradesOfProfesor(toBeDeleted);
+            this.service.deleteProfesorPSSWD(toBeDeleted);
             StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"stergere","profesorul a fost sters cu succes!");
         }
         else{
@@ -807,9 +810,23 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
 
 
 
-
+    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
+    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
+    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
+    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
+    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
     public void handleClearFieldsGrade(ActionEvent actionEvent) {
+
     }
+
+
+
+
+
+
+
+
+    
 
     @Override
     public void updateGrade(GradeChangeEvent event) {
@@ -827,9 +844,7 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     }
 
     @Override
-    public void updateProf(ProfesorChangeEvent profesorChangeEvent) {
-        initModelP();
-    }
+    public void updateProf(ProfesorChangeEvent profesorChangeEvent) { initModelP(); }
 
     public void handleLoadModelStudenti(MouseEvent mouseEvent) {
         StudentDTO studentDTO = this.tableStudenti.getSelectionModel().getSelectedItem();
@@ -866,15 +881,3 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         }
     }
 }
-
-//TODO: lucrul cu notele
-//TODO: filtrari pentru profesor si nota (si ce cui mai trebui)                                                                         (V)
-//TODO: adauga buton reset fields pentru Admin                                                                                          (V)
-//TODO: CONDITIE: on delete student with note                                                                                           (V)
-//TODO: CONDITIE: on delete tema with note                                                                                              (V)
-//TODO: CONDITIE: on delete profesor with note                                                                                          (V)
-//TODO: CONDITIE: on delete profesor with studenti                                                                                      (V)
-//TODO: AUTO: on delete student/profesor - delete username+password                                                                     (V)
-//TODO: AUTO: on select entity from table - load parameters into text fields                                                            (V)
-//TODO: QUESTION : ce permisiuni sa dau asupra notelor???
-//TODO: OBSERVER : implement all observer interface, as changes of students/tasks/grades/teachers will be seen in all table views       (V)

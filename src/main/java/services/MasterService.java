@@ -44,9 +44,11 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
 
 
     public void deleteAllGradesOfStudent(Student student){
-        StreamSupport
+        List<Nota> rez = StreamSupport
                 .stream(this.getAllNota().spliterator(), false)
                 .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .collect(Collectors.toList());
+        rez.stream()
                 .forEach(x -> this.removeByIdNota(x.getId()));
     }
 
@@ -55,57 +57,71 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
                 .stream(this.getAllNota().spliterator(), false)
                 .filter(x -> x.getId().split(":")[1].equals(tema.getId()))
                 .collect(Collectors.toList());
-        //tbd.stream()
-        //        .forEach(x -> this.removeByIdNota(x.getId())); - TODO: won't work due to modifications on the fly
+        //        .forEach(x -> this.removeByIdNota(x.getId())); - !!!!: won't work due to modifications on the fly
         for (Nota n : tbd) {
             this.removeByIdNota(n.getId());
         }
     }
 
     public void deleteAllStudentsANDGradesOfProfesor(Profesor profesor){
-        StreamSupport
-                .stream(this.getAllStudent().spliterator(),false)
+        List<Student> rez = StreamSupport
+                .stream(this.getAllStudent().spliterator(), false)
                 .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .collect(Collectors.toList());
+        //!!!!! if we delete while loading from file => concurrent modification exception !!!!!!
+        rez.stream()
                 .forEach(x -> this.removeByIdStudent(x.getId()));
+
         deleteAllGradesOfProfesor(profesor);
     }
 
     private void deleteAllGradesOfProfesor(Profesor profesor){
-        StreamSupport
-                .stream(this.getAllNota().spliterator(),false)
+        List<Nota> rez = StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
                 .filter(x -> x.getProfesor().equals(profesor.toString()))
+                .collect(Collectors.toList());
+        rez.stream()
                 .forEach(x -> this.removeByIdNota(x.getId()));
     }
 
 
     public void updateAllGradesOfStudent(Student student){
         //nu exista update la grade (nota are numai id-ul) - este complicat de zic ca ar avea sens sa schimbi profesorul care a dat nota pe tema... e teoretic imposibil sa se schimbe proful...
-        StreamSupport
+        List<Nota> rez = StreamSupport
                 .stream(this.getAllNota().spliterator(), false)
                 .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .collect(Collectors.toList());
+        rez.stream()
                 .forEach(x -> this.updateNota(new Nota(student.getId()+":"+x.getId().split(":")[1],x.getValoare(),student.getCadruDidacticIndrumatorLab(),x.getData(),x.getFeedback())));
     }
 
     public void updateAllGradesOfTema(Tema tema){
         //teoretic, daca nu am schimba id-ul temei, nu ar avea sens update-ul...
-        StreamSupport
+        List<Nota> rez = StreamSupport
                 .stream(this.getAllNota().spliterator(), false)
                 .filter(x -> x.getId().split(":")[1].equals(tema.getId()))
+                .collect(Collectors.toList());
+        rez.stream()
                 .forEach(x -> this.updateNota(new Nota(x.getId().split(":")[0]+":"+tema.getId(),x.getValoare(),x.getProfesor(),x.getData(),x.getFeedback())));
     }
 
     public void updateAllStudentsOfProfesor(Profesor profesor){
-        StreamSupport
-                .stream(this.getAllStudent().spliterator(),false)
+        List<Student> rez = StreamSupport
+                .stream(this.getAllStudent().spliterator(), false)
                 .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .collect(Collectors.toList());
+        rez.stream()
                 .forEach(x -> this.updateStudent(new Student(x.getId(),x.getNume(),x.getPrenume(),x.getGrupa(),x.getEmail(),profesor.toString())));
+
         updateAllGradesOfProfesor(profesor);
     }
 
     public void updateAllGradesOfProfesor(Profesor profesor){
-        StreamSupport
-                .stream(this.getAllNota().spliterator(),false)
+        List<Nota> rez = StreamSupport
+                .stream(this.getAllNota().spliterator(), false)
                 .filter(x -> x.getProfesor().equals(profesor.toString()))
+                .collect(Collectors.toList());
+        rez.stream()
                 .forEach(x -> this.updateNota(new Nota(x.getId(),x.getValoare(),profesor.toString(),x.getData(),x.getFeedback())));
     }
 
