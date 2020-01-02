@@ -11,17 +11,27 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import mvc.StudentAlert;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import services.MasterService;
 import utils.Constants;
+import utils.SendEmailUtility;
 import utils.events.GradeChangeEvent;
 import utils.observer.GradeObserver;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -73,6 +83,13 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     public Label labelProfesor;
 
     public CheckBox checkboxInvert;
+    public TextField textSavePath;
+
+    public TextField textFileName1;
+    public TextField textFileName2;
+    public TextField textFileName3;
+    public TextField textFileName4;
+
 
 
     private MasterService service;
@@ -125,26 +142,22 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     }
 
 
-
-
-
-
     private int getEffectiveRangeOfDelayMotvation(Student s, Tema t, String date) {//TODO: big workload here
         Iterable<Motivation> motivations = service.getAllMotivation();
         List<Motivation> motivationList = StreamSupport.stream(motivations.spliterator(), false).collect(Collectors.toList());
-        List<Interval> intervals = motivationList.stream().filter(mot -> mot.getIdStudent().equals(s.getId())).map(x -> new Interval(x.getStart(),x.getEnd())).collect(Collectors.toList());
+        List<Interval> intervals = motivationList.stream().filter(mot -> mot.getIdStudent().equals(s.getId())).map(x -> new Interval(x.getStart(), x.getEnd())).collect(Collectors.toList());
 
         LocalDate end = LocalDate.parse(t.getDeadlineWeek(), Constants.DATE_TIME_FORMATTER);
         LocalDate now = LocalDate.parse(date, Constants.DATE_TIME_FORMATTER);
 
-        if(!Constants.compareDates(now, end)){
+        if (!Constants.compareDates(now, end)) {
             return 0;
         }//task is not overdue => no need for motivation
 
         int sumMotivated = 0;
         for (Interval interval : intervals) {//task is overdue - so it needs motivation
             //if period between task deadline and now has any common dates with a motivation interval (so that we can motivate the delay)
-            if(Constants.intervalsHaveDatesInCommon(interval.getStart(), interval.getEnd(), end, now)){
+            if (Constants.intervalsHaveDatesInCommon(interval.getStart(), interval.getEnd(), end, now)) {
                 sumMotivated += Constants.getIntervalsNumberOfCommonWeeks(interval.getStart(), interval.getEnd(), end, now);
             }
         }
@@ -165,7 +178,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         int wn = Constants.getWeek(now);
 
         if (start.getYear() == end.getYear() && end.getYear() == now.getYear()) {// S:2019 E:2019 N:2019 or S:2020 E:2020 N:2020 (trivial case)
-            if( we > wn){//last week of the year is tricky
+            if (we > wn) {//last week of the year is tricky
                 wn += 52;
             }
             return wn - we;
@@ -189,61 +202,60 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     }
 
 
-    private int computeEffectiveGradeConsideringAllCases(Student s, Tema t, String date){
-        int motivated = getEffectiveRangeOfDelayMotvation(s,t,date);
-        int delay = computeEffectiveDelay(t,date);
+    private int computeEffectiveGradeConsideringAllCases(Student s, Tema t, String date) {
+        int motivated = getEffectiveRangeOfDelayMotvation(s, t, date);
+        int delay = computeEffectiveDelay(t, date);
         delay -= motivated;
-        if(delay > 2){
+        if (delay > 2) {
             return 0;
         }
-        return Math.min(10,10 - delay);
+        return Math.min(10, 10 - delay);
     }
 
-    private int computeMaxGrade(Student s, Tema t, String date){//TODO: handle date shift to semester (from holiday)
+    private int computeMaxGrade(Student s, Tema t, String date) {//TODO: handle date shift to semester (from holiday)
         int grade = computeEffectiveGradeConsideringAllCases(s, t, date);
         return grade;
     }
 
     private String computeFeedback(Student s, Tema t, String date) {//TODO: handle date shift to semester (from holiday)
         int grade = computeEffectiveGradeConsideringAllCases(s, t, date);
-        if(grade <= 7){
+        if (grade <= 7) {
             return "TEMA NU MAI POATE FI PREDATA";
         }
-        if(grade == 10){
+        if (grade == 10) {
             return "NICIO OBSERVATIE";
         }
         return "NOTA A FOST DIMINUATA CU " + Integer.toString(10 - grade) + " PUNCTE DATORITA INTARZIERILOR";
     }
 
-    private void initModelGradeINVERTED(){
+    private void initModelGradeINVERTED() {
         filterMergeSearchNota();
     }
 
-    private String getTemaCurenta(LocalDate date){
+    private String getTemaCurenta(LocalDate date) {
         String now = date.format(Constants.DATE_TIME_FORMATTER);
         List<Tema> temeCurente = StreamSupport
-                .stream(this.service.getAllTema().spliterator(),false)
-                .filter(t -> Constants.compareDates(t.getDeadlineWeek(),now) && Constants.compareDates(now, t.getStartWeek()))
+                .stream(this.service.getAllTema().spliterator(), false)
+                .filter(t -> Constants.compareDates(t.getDeadlineWeek(), now) && Constants.compareDates(now, t.getStartWeek()))
                 .collect(Collectors.toList());
-        if(temeCurente.size() != 0)
+        if (temeCurente.size() != 0)
             return temeCurente.get(0).toString();
-        else{
+        else {
             return "-";
         }
     }
 
-    private void recomputeGrades(){
-        if(this.tableNota.getSelectionModel().getSelectedItem() == null){
+    private void recomputeGrades() {
+        if (this.tableNota.getSelectionModel().getSelectedItem() == null) {
             this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
         }
-        if(this.checkboxInvert.isSelected()){
+        if (this.checkboxInvert.isSelected()) {
             initModelGradeINVERTED();
         }
     }
 
 
-
-    private void filterMergeSearchStudent(){
+    private void filterMergeSearchStudent() {
         Predicate<Student> filtered = null;//TODO: asa compunem predicatele
 
         Iterable<Student> students = service.getAllStudent();
@@ -255,49 +267,44 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         Predicate<Student> filterGrupa = x -> Integer.toString(x.getGrupa()).toLowerCase().contains(textStudentGrupa.getText().toLowerCase());
         Predicate<Student> filterEmail = x -> x.getEmail().toLowerCase().contains(textStudentEmail.getText().toLowerCase());
 
-        if (!textStudentNume.getText().isEmpty()){//TODO: CHANGE ALL PREDICATES WITH {IF TEXTFIELD IS EMPTY => RETURN TRUE; ELSE RETURN THE FILTER}
-            if(filtered == null){//TODO: HERE, WE DO NOT TEST IF FILTERED = NULL; WE INITIALIZE FILTERED VARIABLE AS UNION AND(ALL PREDICATES)
+        if (!textStudentNume.getText().isEmpty()) {//TODO: CHANGE ALL PREDICATES WITH {IF TEXTFIELD IS EMPTY => RETURN TRUE; ELSE RETURN THE FILTER}
+            if (filtered == null) {//TODO: HERE, WE DO NOT TEST IF FILTERED = NULL; WE INITIALIZE FILTERED VARIABLE AS UNION AND(ALL PREDICATES)
                 filtered = filterNume;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterNume);
             }
         }
-        if (!textStudentPrenume.getText().isEmpty()){
-            if(filtered == null){
+        if (!textStudentPrenume.getText().isEmpty()) {
+            if (filtered == null) {
                 filtered = filterPrenume;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterPrenume);
             }
         }
-        if (!textStudentGrupa.getText().isEmpty()){
-            if(filtered == null){
+        if (!textStudentGrupa.getText().isEmpty()) {
+            if (filtered == null) {
                 filtered = filterGrupa;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterGrupa);
             }
         }
-        if (!textStudentEmail.getText().isEmpty()){
-            if(filtered == null){
+        if (!textStudentEmail.getText().isEmpty()) {
+            if (filtered == null) {
                 filtered = filterEmail;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterEmail);
             }
         }
 
-        if( filtered == null){
+        if (filtered == null) {
             modelS.setAll(studentList);
-        }
-        else{
+        } else {
             modelS.setAll(studentList.stream().filter(filtered).collect(Collectors.toList()));
         }
     }
 
 
-    private void filterMergeSearchTema(){
+    private void filterMergeSearchTema() {
         Predicate<Tema> filtered = null;
 
         Iterable<Tema> tasks = service.getAllTema();
@@ -309,52 +316,47 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         Predicate<Tema> filterStart = x -> x.getStartWeek().contains(dateTemaInceput.getText());
         Predicate<Tema> filterStop = x -> x.getDeadlineWeek().contains(dateTemaSfarsit.getText());
 
-        if (!textTemaNume.getText().isEmpty()){
-            if(filtered == null){
+        if (!textTemaNume.getText().isEmpty()) {
+            if (filtered == null) {
                 filtered = filterNume;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterNume);
             }
         }
-        if (!textTemaDescriere.getText().isEmpty()){
-            if(filtered == null){
+        if (!textTemaDescriere.getText().isEmpty()) {
+            if (filtered == null) {
                 filtered = filterDescriere;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterDescriere);
             }
         }
-        if (!(dateTemaInceput.getText() == null)){
-            if(filtered == null){
+        if (!(dateTemaInceput.getText() == null)) {
+            if (filtered == null) {
                 filtered = filterStart;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterStart);
             }
         }
-        if (!(dateTemaSfarsit.getText() == null)){
-            if(filtered == null){
+        if (!(dateTemaSfarsit.getText() == null)) {
+            if (filtered == null) {
                 filtered = filterStop;
-            }
-            else{
+            } else {
                 filtered = filtered.and(filterStop);
             }
         }
 
-        if( filtered == null){
+        if (filtered == null) {
             modelT.setAll(taskList);
-        }
-        else{
+        } else {
             modelT.setAll(taskList.stream().filter(filtered).collect(Collectors.toList()));
         }
     }
 
 
-
     @FXML
     public void initialize() {
         this.dateNotaData.setValue(LocalDate.now());
+        this.textSavePath.setText("C:\\Users\\George\\Desktop\\PDFsPE");
 
         columnStudentNume.setCellValueFactory(new PropertyValueFactory<Student, String>("nume"));
         columnStudentPrenume.setCellValueFactory(new PropertyValueFactory<Student, String>("prenume"));
@@ -374,7 +376,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         textStudentEmail.textProperty().addListener(((observableValue, s, t1) -> {
             filterMergeSearchStudent();
         }));
-
 
 
         //TODO: one day I should refactor "tableTema" into "columnTema"...
@@ -414,7 +415,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         }));
 
 
-
         textNotaProf.textProperty().addListener(((observableValue, s, t1) -> {
             filterMergeSearchNota();
         }));
@@ -436,25 +436,25 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     private void filterMergeSearchNota() {
         List<NotaDTO> gradeDTOList = null;
 
-        if(this.checkboxInvert.isSelected()){
-            List<Nota> grades = StreamSupport.stream(service.getAllNota().spliterator(), false).collect(Collectors.toList());;
+        if (this.checkboxInvert.isSelected()) {
+            List<Nota> grades = StreamSupport.stream(service.getAllNota().spliterator(), false).collect(Collectors.toList());
+            ;
             List<Student> studenti = StreamSupport.stream(service.getAllStudent().spliterator(), false).collect(Collectors.toList());
             List<Tema> teme = StreamSupport.stream(service.getAllTema().spliterator(), false).collect(Collectors.toList());
             gradeDTOList = new ArrayList<>();
             for (Student student : studenti) {
-                if(student.getCadruDidacticIndrumatorLab().equals(this.loggedInProfessor.toString()))
+                if (student.getCadruDidacticIndrumatorLab().equals(this.loggedInProfessor.toString()))
                     for (Tema tema : teme) {
-                        String nid = student.getId()+":"+tema.getId();
-                        if(grades.stream().noneMatch(gr -> gr.getId().equals(nid))){
+                        String nid = student.getId() + ":" + tema.getId();
+                        if (grades.stream().noneMatch(gr -> gr.getId().equals(nid))) {
                             int valoare = computeMaxGrade(student, tema, this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER));
                             String feedback = computeFeedback(student, tema, this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER));
-                            Nota nota = new Nota(student.getId()+":"+tema.getId(), valoare,this.loggedInProfessor.getNume()+" "+this.loggedInProfessor.getPrenume(), this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER),feedback);
-                            gradeDTOList.add(new NotaDTO(nota,tema,student));
+                            Nota nota = new Nota(student.getId() + ":" + tema.getId(), valoare, this.loggedInProfessor.getNume() + " " + this.loggedInProfessor.getPrenume(), this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER), feedback);
+                            gradeDTOList.add(new NotaDTO(nota, tema, student));
                         }//else we simply don't add
                     }
             }
-        }
-        else{
+        } else {
             Iterable<Nota> grades = service.getAllNota();
             List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
                     .collect(Collectors.toList());
@@ -514,7 +514,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     }
 
 
-
     private List<NotaDTO> convertGradeToDTO(List<Nota> gradeList) {
         return gradeList.stream()
                 .map(n -> {
@@ -566,12 +565,11 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         String oldPsswd = this.textOldPassword.getText();
         String newPsswd = this.textNewPassword.getText();
         String email = this.loggedInProfessor.getEmail();//USERNAME IS THE EMAIL!!!*/
-        boolean state = this.service.changeProfessorPassword(email,oldPsswd,newPsswd);
-        if(state){
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"Resetare","parola a fost actualizata!");
-        }
-        else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Log In","parola nu a putut fi actualizata!");
+        boolean state = this.service.changeProfessorPassword(email, oldPsswd, newPsswd);
+        if (state) {
+            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Resetare", "parola a fost actualizata!");
+        } else {
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Log In", "parola nu a putut fi actualizata!");
         }
     }
 
@@ -582,15 +580,14 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         this.textStudentPrenume.setText("");
     }
 
-    // gogo@cs.ubbcluj.ro
+
     public void handleAddNota(ActionEvent actionEvent) {
-        if(checkboxInvert.isSelected()){
-            if ( !this.textNotaValoare.getText().isEmpty() && !this.textNotaProf.getText().isEmpty() && !this.textNotaFeedback.getText().isEmpty()){
+        if (checkboxInvert.isSelected()) {
+            if (!this.textNotaValoare.getText().isEmpty() && !this.textNotaProf.getText().isEmpty() && !this.textNotaFeedback.getText().isEmpty()) {
                 Nota toBeAdded = new Nota(this.textNotaId.getText(), Integer.parseInt(this.textNotaValoare.getText()), this.textNotaProf.getText(), this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER), this.textNotaFeedback.getText());
-                if(this.textNotaId.getText().equals("")){
-                    StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Eroare","nu s-a putut crea o nota!");
-                }
-                else {
+                if (this.textNotaId.getText().equals("")) {
+                    StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut crea o nota!");
+                } else {
                     Student s = this.service.findByIdStudent(toBeAdded.getId().split(":")[0]);
                     Tema t = this.service.findByIdTema(toBeAdded.getId().split(":")[1]);
                     int max = this.computeMaxGrade(s, t, this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER));
@@ -601,38 +598,38 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
                     } else {
                         Nota rez = this.service.addNota(toBeAdded);
                         if (rez == null) {
+                            List<Student> toBeEmailed = new ArrayList<>();
+                            toBeEmailed.add(s);
+                            SendEmailUtility.sendEmail(toBeEmailed, toBeAdded.toString());
                             StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost adaugata!");
                             handleclearFieldsNota();
+
                         } else {
                             StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nota nu s-a putut adauga!");
                         }
                     }
                 }
+            } else {
+                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati un rand din tabela!");
             }
-            else{
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Eroare","selectati un rand din tabela!");
-            }
-        }
-        else{
-            StudentAlert.showMessage(null, Alert.AlertType.WARNING,"Avertisment","pentru a intra in modul de adaugare, bifati casuta!");
+        } else {
+            StudentAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de adaugare, bifati casuta!");
         }
 
     }
 
     public void handleDeleteNota(ActionEvent actionEvent) {
-        if(!checkboxInvert.isSelected()){
+        if (!checkboxInvert.isSelected()) {
             Nota n = this.service.findByIdNota(this.textNotaId.getText());
-            if(n == null){
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Eroare","selectati o nota din tabel!");
-            }
-            else{
+            if (n == null) {
+                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati o nota din tabel!");
+            } else {
                 this.service.removeByIdNota(n.getId());
-                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"Succes","nota a fost stearsa cu succes!");
+                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost stearsa cu succes!");
                 handleclearFieldsNota();
             }
-        }
-        else{
-            StudentAlert.showMessage(null, Alert.AlertType.WARNING,"Avertisment","pentru a intra in modul de stergere, debifati casuta!");
+        } else {
+            StudentAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de stergere, debifati casuta!");
         }
     }
 
@@ -675,7 +672,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         this.dateTemaSfarsit.setText("");
     }
 
-    private void handleclearFieldsNota(){
+    private void handleclearFieldsNota() {
         this.textNotaId.setText("");
         this.textNotaTema.setText("");
         this.textNotaStudent.setText("");
@@ -698,17 +695,175 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
 
     public void handleSelectionChanged(MouseEvent mouseEvent) {
-        NotaDTO nota = this.tableNota.getSelectionModel().getSelectedItem();
-        this.textNotaId.setText(nota.getIdNota());
+        //NotaDTO nota = this.tableNota.getSelectionModel().getSelectedItem();
+        /*this.textNotaId.setText(nota.getIdNota());
         this.textNotaStudent.setText(nota.getS().toString());
         this.textNotaProf.setText(nota.getProfesor());
         this.textNotaValoare.setText(Integer.toString(nota.getValoare()));
         this.dateNotaData.setValue(LocalDate.parse(nota.getDataNota(), Constants.DATE_TIME_FORMATTER));
         this.textNotaFeedback.setText(nota.getFeedback());
-        this.textNotaTema.setText(nota.getT().toString());
+        this.textNotaTema.setText(nota.getT().toString());*/
+        //TODO: wtf happened here ???
     }
 
     public void handleClearFieldsNota(ActionEvent actionEvent) {
         handleclearFieldsNota();
     }
+
+
+    public void handleExport1(ActionEvent actionEvent) {
+        try {
+            List<Object> lines = this.service.raport1();
+            String title = "Nota la laborator pentru fiecare student";
+            String pdfName;
+            if(this.textFileName1.getText().isEmpty()){
+                pdfName = this.textFileName1.getPromptText();
+            }
+            else{
+                pdfName = this.textFileName1.getText();
+            }
+            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
+            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+        } catch (IOException e) {
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
+            //e.printStackTrace();
+        }
+    }
+
+    public void handleExport2(ActionEvent actionEvent) {
+        try {
+            List<Object> lines = this.service.raport2();
+            String title = "Cea mai grea tema";
+            String pdfName;
+            if(this.textFileName2.getText().isEmpty()){
+                pdfName = this.textFileName2.getPromptText();
+            }
+            else{
+                pdfName = this.textFileName2.getText();
+            }
+            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
+            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+        } catch (IOException e) {
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
+            //e.printStackTrace();
+        }
+    }
+
+    public void handleExport3(ActionEvent actionEvent) {
+        try {
+            List<Object> lines = this.service.raport3();
+            String title = "Studentii care pot intra in examen";
+            String pdfName;
+            if(this.textFileName3.getText().isEmpty()){
+                pdfName = this.textFileName3.getPromptText();
+            }
+            else{
+                pdfName = this.textFileName3.getText();
+            }
+            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, title, this.loggedInProfessor.toString(), lines);
+            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+        } catch (IOException e) {
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
+            //e.printStackTrace();
+        }
+    }
+
+    public void handleExport4(ActionEvent actionEvent) {
+        try {
+            List<Object> lines = this.service.raport4();
+            String title = "Studentii care au predat la timp toate temele";
+            String pdfName;
+            if(this.textFileName4.getText().isEmpty()){
+                pdfName = this.textFileName4.getPromptText();
+            }
+            else{
+                pdfName = this.textFileName4.getText();
+            }
+            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, title, this.loggedInProfessor.toString(), lines);
+            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+        } catch (IOException e) {
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
+            //e.printStackTrace();
+        }
+    }
+
+    public static void createPDFFromRaport(String pdfPath, String title, String subtitle, List<Object> lines) throws IOException {
+        PDFont font = PDType1Font.HELVETICA;
+        int marginTop = 30;
+        int fontSize = 18;
+
+        final PDDocument doc = new PDDocument();
+        PDPage page = new PDPage(PDRectangle.A4);
+        PDRectangle mediaBox = page.getMediaBox();
+        doc.addPage(page);
+
+        PDPageContentStream stream = new PDPageContentStream(doc, page);
+
+
+
+        float subtitleWidth = font.getStringWidth(subtitle) / 1000 * fontSize;
+        float subtitleHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
+
+        float startXX = (mediaBox.getWidth() - subtitleWidth) / 2;
+        float startYY = mediaBox.getHeight() - marginTop - subtitleHeight;
+
+        stream.beginText();
+        stream.setFont(font, fontSize);
+        stream.newLineAtOffset(startXX, startYY);
+        stream.showText(subtitle);
+        stream.endText();
+
+
+        marginTop = 60;
+        float titleWidth = font.getStringWidth(title) / 1000 * fontSize;
+        float titleHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
+
+        float startX = (mediaBox.getWidth() - titleWidth) / 2;
+        float startY = mediaBox.getHeight() - marginTop - titleHeight;
+
+        stream.beginText();
+        stream.setFont(font, fontSize);
+        stream.newLineAtOffset(startX, startY);
+        stream.showText(title);
+        stream.endText();
+
+
+
+
+        int tx = 50;
+        int ty = 700;
+
+        stream.setFont(PDType1Font.HELVETICA, 10);
+
+        for (Object line : lines) {
+            String lineText = line.toString();
+
+            stream.beginText();
+            stream.newLineAtOffset(tx, ty);
+            stream.showText(lineText);
+            stream.newLine();
+            stream.endText();
+            ty -= 20;
+        }
+
+
+        stream.close();
+        doc.save(new File(pdfPath));
+
+    }
+
+    public void handleOpenFileChooser(ActionEvent actionEvent) {
+        final DirectoryChooser directoryChooser =
+                new DirectoryChooser();
+        final File selectedDirectory =
+                directoryChooser.showDialog(dialogStage);
+        if (selectedDirectory != null) {
+            this.textSavePath.setText(selectedDirectory.getAbsolutePath());
+        }
+        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
+        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
+        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
+        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
+    }
+
 }

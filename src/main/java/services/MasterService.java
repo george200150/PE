@@ -1,10 +1,9 @@
 package services;
 
 import domain.*;
+import utils.Constants;
 import utils.events.*;
 import utils.observer.*;
-import utils.observer.Observable;
-import utils.observer.Observer;
 import validators.ValidationException;
 
 import java.io.IOException;
@@ -378,6 +377,96 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 
 
+    private NotaDTO getDTOFromNota(Nota n){
+        Student s = findByIdStudent(n.getId().split(":")[0]);
+        Tema t = findByIdTema(n.getId().split(":")[1]);
+        return new NotaDTO(n,t,s);
+    }
+    //Nota la laborator pentru fiecare student (media ponderata a notelor de la
+    //temele de laborator;
+    // pondere tema = nr de saptamani alocate temei)
+    public List<Object> raport1(){
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        Map<Student, List<NotaDTO>> dtoMap = dtoList.stream()
+                .collect(Collectors.groupingBy(NotaDTO::getS));
+
+        Map<Student, Double> mediileStudentilor = dtoMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(sub -> (sub.getValoare() * (double) (sub.getT().getDuration())) / 14).sum()));
+
+        return mediileStudentilor.entrySet().stream()
+                .map(x -> new WeightedAVGDTO(x.getKey(), x.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Object> raport2(){
+
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        Map<Tema, List<NotaDTO>> dtoMap = dtoList.stream()
+                .collect(Collectors.groupingBy(NotaDTO::getT));
+
+        Map<Tema, Double> raport = dtoMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> (e.getValue().stream().mapToDouble(NotaDTO::getValoare).sum()) / (double)(e.getValue().size())));
+        //TODO posibil sa trebuiasca sa schimb "mapToDouble(NotaDTO::getValoare)" cu "mapToDouble(sub -> 'weighted avg')"...
+
+        List<Map.Entry<Tema, Double>> lowestraport = raport.entrySet()
+                .stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue))
+                .limit(1)
+                .collect(Collectors.toList());
+
+        Tema result = lowestraport.get(0).getKey();
+        List<Object> resultList = new ArrayList<>();
+        resultList.add(result);
+        return resultList;
+    }
+
+    //Studentii care pot intra in examen (media mai mare sau egala cu 4)
+    public List<Object> raport3(){
+
+        return StreamSupport
+                .stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> this.getMedieStudent(x) >= 4)
+                .collect(Collectors.toList());
+    }
+
+    private double getMedieStudent(Student student){
+        List<Nota> noteStudent = StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .collect(Collectors.toList());
+        double nrNote = noteStudent.size();
+        double sum = noteStudent.stream().mapToInt(Nota::getValoare).sum();
+        return sum / nrNote;
+    }
+
+    public List<Object> raport4(){
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        return dtoList.stream()
+                .filter(x -> Constants.compareDates(x.getT().getDeadlineWeek(), x.getDataNota()))
+                .map(NotaDTO::getS)
+                .collect(Collectors.toList());
+    }
 
 
 

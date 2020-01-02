@@ -10,11 +10,11 @@ public class Tema extends Entity<String> {
     private String id;
     private String nume;
     private String descriere;
-    private String startWeek;//LOCAL DATE TIME => STRING
-    private String deadlineWeek;//LOCAL DATE TIME => STRING
+    private String startWeek;
+    private String deadlineWeek;
 
 
-    public Tema(String id, String nume, String descriere, LocalDateTime deadlineWeek) {//TODO: auto complete startweek with .now()
+    public Tema(String id, String nume, String descriere, LocalDateTime deadlineWeek) {
         this.id = id;
         this.nume = nume;
         this.descriere = descriere;
@@ -22,7 +22,7 @@ public class Tema extends Entity<String> {
         this.deadlineWeek = deadlineWeek.format(Constants.DATE_TIME_FORMATTER);
     }
 
-    public Tema(String id, String nume, String descriere, LocalDateTime startWeek, LocalDateTime deadlineWeek) {//TODO: get dates from localdateTime
+    public Tema(String id, String nume, String descriere, LocalDateTime startWeek, LocalDateTime deadlineWeek) {
         this.id = id;
         this.nume = nume;
         this.descriere = descriere;
@@ -30,7 +30,7 @@ public class Tema extends Entity<String> {
         this.deadlineWeek = deadlineWeek.format(Constants.DATE_TIME_FORMATTER);
     }
 
-    public Tema(String id, String nume, String descriere, String startWeek, String deadlineWeek) {//TODO: get dates from String input
+    public Tema(String id, String nume, String descriere, String startWeek, String deadlineWeek) {
         this.id = id;
         this.nume = nume;
         this.descriere = descriere;
@@ -89,13 +89,6 @@ public class Tema extends Entity<String> {
 
     @Override
     public String toString() {
-        /*return "Tema{" +
-                "id='" + id + '\'' +
-                ", nume='" + nume + '\'' +
-                ", descriere='" + descriere + '\'' +
-                ", startWeek=" + startWeek +
-                ", deadlineWeek=" + deadlineWeek +
-                '}';*/
         return  nume + " - " + descriere;
     }
 

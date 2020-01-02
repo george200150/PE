@@ -127,11 +127,28 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <Label layoutX="35.0" layoutY="14.0" text="Generati si salvati rapoarte despre performanta studentilor:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                        <Label layoutX="35.0" layoutY="14.0" text="Generati si salvati in format PDF rapoarte despre performanta studentilor:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
                            <font>
                               <Font size="20.0" />
                            </font>
                         </Label>
+                        <Button layoutX="224.0" layoutY="98.0" mnemonicParsing="false" onAction="#handleExport1" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 1" />
+                        <Button layoutX="224.0" layoutY="193.0" mnemonicParsing="false" onAction="#handleExport3" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 3" />
+                        <Button layoutX="224.0" layoutY="145.0" mnemonicParsing="false" onAction="#handleExport2" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 2" />
+                        <Button layoutX="224.0" layoutY="236.0" mnemonicParsing="false" onAction="#handleExport4" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 4" />
+                        <Label layoutX="373.0" layoutY="102.0" text="Nota la laborator pentru fiecare student (media ponderata a notelor de latemele de laborator; pondere tema=nr de saptamani alocate temei)." />
+                        <Label layoutX="373.0" layoutY="149.0" text="Nota la laborator pentru fiecare student (media ponderata a notelor de latemele de laborator; pondere tema=nr de saptamani alocate temei)." />
+                        <Label layoutX="373.0" layoutY="197.0" text="Studentii care pot intra in examen (media mai mare sau egala cu 4)" />
+                        <Label layoutX="373.0" layoutY="240.0" text="Studentii care au predat la timp toate temele" />
+                        <TextField fx:id="textSavePath" layoutX="54.0" layoutY="315.0" prefHeight="25.0" prefWidth="486.0" />
+                        <Label layoutX="63.0" layoutY="286.0" text="Alegeti locatia pe disc unde sa fie salvat raportul:" textFill="RED" />
+                        <Button layoutX="349.0" layoutY="282.0" mnemonicParsing="false" onAction="#handleOpenFileChooser" text="cautati un director in sistem" />
+                        <TextField fx:id="textFileName1" layoutX="54.0" layoutY="98.0" prefHeight="25.0" prefWidth="148.0" promptText="raport1.pdf" />
+                        <Label layoutX="60.0" layoutY="64.0" text="scrieti denumirea cu care " textFill="RED" />
+                        <Label layoutX="44.0" layoutY="81.0" text="doriti sa fie salvat fiecare raport" textFill="RED" />
+                        <TextField fx:id="textFileName2" layoutX="54.0" layoutY="145.0" prefHeight="25.0" prefWidth="148.0" promptText="raport2.pdf" />
+                        <TextField fx:id="textFileName3" layoutX="54.0" layoutY="193.0" prefHeight="25.0" prefWidth="148.0" promptText="raport3.pdf" />
+                        <TextField fx:id="textFileName4" layoutX="54.0" layoutY="236.0" prefHeight="25.0" prefWidth="148.0" promptText="raport4.pdf" />
                      </children>
                   </AnchorPane>
               </content>

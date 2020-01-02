@@ -267,12 +267,8 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         Predicate<Student> filterEmail = x -> x.getEmail().toLowerCase().contains(textEmailStudent.getText().toLowerCase());
         Predicate<Student> filterProf = x -> x.getCadruDidacticIndrumatorLab().toLowerCase().contains(textProfStudent.getText().toLowerCase());
 
-        if (!textNumeStudent.getText().isEmpty()) {//TODO: CHANGE ALL PREDICATES WITH {IF TEXTFIELD IS EMPTY => RETURN TRUE; ELSE RETURN THE FILTER}
-            if (filtered == null) {//TODO: HERE, WE DO NOT TEST IF FILTERED = NULL; WE INITIALIZE FILTERED VARIABLE AS UNION AND(ALL PREDICATES)
-                filtered = filterNume;
-            } else {
-                filtered = filtered.and(filterNume);
-            }
+        if (!textNumeStudent.getText().isEmpty()) {
+            filtered = filterNume;// WE INITIALIZE FILTERED VARIABLE AS UNION AND(ALL PREDICATES)
         }
         if (!textPrenumeStudent.getText().isEmpty()) {
             if (filtered == null) {
@@ -323,11 +319,7 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         Predicate<ProfesorDTO> filterEmail = x -> x.getEmail().toLowerCase().contains(textEmailProf.getText().toLowerCase());
 
         if (!textNumeProf.getText().isEmpty()) {
-            if (filtered == null) {
-                filtered = filterNume;
-            } else {
-                filtered = filtered.and(filterNume);
-            }
+            filtered = filterNume;
         }
         if (!textPrenumeProf.getText().isEmpty()) {
             if (filtered == null) {
@@ -558,6 +550,23 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         this.textParolaStudent.setText("");
     }
 
+    private boolean verifyTaskInterval(Tema tema, Tema except){//verify that the tasks are in a contiguous sequence along the semester (intervals for tasks not like: 1-5 2-3 3-4 1-6 2-4)
+        List<Tema> teme = StreamSupport.stream(this.service.getAllTema().spliterator(), false).collect(Collectors.toList());
+        if(except != null){//except that homework (works for update where there is already that interval occupied
+            teme.remove(except);
+        }
+        LocalDate is2 = LocalDate.parse(tema.getStartWeek(), Constants.DATE_TIME_FORMATTER);
+        LocalDate ie2 = LocalDate.parse(tema.getStartWeek(), Constants.DATE_TIME_FORMATTER);
+
+        for (Tema t: teme) {
+            LocalDate is1 = LocalDate.parse(t.getStartWeek(), Constants.DATE_TIME_FORMATTER);
+            LocalDate ie1 = LocalDate.parse(t.getDeadlineWeek(), Constants.DATE_TIME_FORMATTER);
+            if(Constants.getIntervalsNumberOfCommonWeeks(is1, ie1, is2, ie2) > 1){
+                return false;
+            }
+        }
+        return true;
+    }
 
     public void handleAddTema(ActionEvent actionEvent) {
         String id = this.textIdTema.getText();
@@ -566,12 +575,18 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         String start = this.dateInceputTema.getValue().format(Constants.DATE_TIME_FORMATTER);
         String end = this.dateSfarsitTema.getValue().format(Constants.DATE_TIME_FORMATTER);
         Tema tema = new Tema(id, nume, descriere, start, end);
-        Tema rez = this.service.addTema(tema);
-        if (rez == null) {
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "tema a fost adaugata cu succes!");
-        } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema nu a putut fi adaugata!");
+        if(verifyTaskInterval(tema, null)){
+            Tema rez = this.service.addTema(tema);
+            if (rez == null) {
+                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "tema a fost adaugata cu succes!");
+            } else {
+                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema nu a putut fi adaugata!");
+            }
         }
+        else{
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema introdusa se suprapune cu alta tema!");
+        }
+
     }
 
     public void handleUpdateTema(ActionEvent actionEvent) {
@@ -581,31 +596,35 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         String start = this.dateInceputTema.getValue().format(Constants.DATE_TIME_FORMATTER);
         String end = this.dateSfarsitTema.getValue().format(Constants.DATE_TIME_FORMATTER);
         Tema toBeUpdated = new Tema(id, nume, descriere, start, end);
-        if (StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getId().split(":")[1].equals(toBeUpdated.getId()))) {
-            try {
-                // create a new stage for the popup dialog.
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("/views/confirmations/UpdateTemaConfirmView.fxml"));
+        if (verifyTaskInterval(toBeUpdated, this.service.findByIdTema(id))) {
+            if (StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getId().split(":")[1].equals(toBeUpdated.getId()))) {
+                try {
+                    // create a new stage for the popup dialog.
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(getClass().getResource("/views/confirmations/UpdateTemaConfirmView.fxml"));
 
-                AnchorPane root = (AnchorPane) loader.load();
+                    AnchorPane root = (AnchorPane) loader.load();
 
-                // Create the dialog Stage.
-                Stage dialogStage = new Stage();
-                dialogStage.setTitle("Confirmare");
-                dialogStage.initModality(Modality.WINDOW_MODAL);
-                Scene scene = new Scene(root);
-                dialogStage.setScene(scene);
+                    // Create the dialog Stage.
+                    Stage dialogStage = new Stage();
+                    dialogStage.setTitle("Confirmare");
+                    dialogStage.initModality(Modality.WINDOW_MODAL);
+                    Scene scene = new Scene(root);
+                    dialogStage.setScene(scene);
 
-                UpdateTemaConfirmController updateTemaConfirmController = loader.getController();
-                updateTemaConfirmController.setService(this, dialogStage, toBeUpdated);
+                    UpdateTemaConfirmController updateTemaConfirmController = loader.getController();
+                    updateTemaConfirmController.setService(this, dialogStage, toBeUpdated);
 
-                dialogStage.show();
+                    dialogStage.show();
 
-            } catch (IOException e) {
-                e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                updateTemaForReal(toBeUpdated);
             }
         } else {
-            updateTemaForReal(toBeUpdated);
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "tema introdusa se suprapune cu o alta tema!");
         }
     }
 
@@ -700,13 +719,9 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
                 StreamSupport.stream(this.service.getAllNota().spliterator(), false).anyMatch(x -> x.getProfesor().equals(toBeDeleted.toString()))
         ) {
             try {
-                // create a new stage for the popup dialog.
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/views/confirmations/DeleteProfesorConfirmView.fxml"));
-
                 AnchorPane root = (AnchorPane) loader.load();
-
-                // Create the dialog Stage.
                 Stage dialogStage = new Stage();
                 dialogStage.setTitle("Confirmare");
                 dialogStage.initModality(Modality.WINDOW_MODAL);
@@ -749,13 +764,9 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
                 StreamSupport.stream(this.service.getAllStudent().spliterator(), false).anyMatch(x -> x.getCadruDidacticIndrumatorLab().equals(toBeUpdated.toString()))
         ) {
             try {
-                // create a new stage for the popup dialog.
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/views/confirmations/UpdateProfesorConfirmView.fxml"));
-
                 AnchorPane root = (AnchorPane) loader.load();
-
-                // Create the dialog Stage.
                 Stage dialogStage = new Stage();
                 dialogStage.setTitle("Confirmare");
                 dialogStage.initModality(Modality.WINDOW_MODAL);
@@ -826,7 +837,7 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
 
 
 
-    
+
 
     @Override
     public void updateGrade(GradeChangeEvent event) {
