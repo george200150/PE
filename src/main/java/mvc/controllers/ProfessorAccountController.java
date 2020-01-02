@@ -12,6 +12,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import mvc.StudentAlert;
@@ -83,12 +84,12 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     public Label labelProfesor;
 
     public CheckBox checkboxInvert;
-    public TextField textSavePath;
+    //public TextField textSavePath;
 
-    public TextField textFileName1;
+    /*public TextField textFileName1;
     public TextField textFileName2;
     public TextField textFileName3;
-    public TextField textFileName4;
+    public TextField textFileName4;*/
 
 
 
@@ -356,7 +357,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     @FXML
     public void initialize() {
         this.dateNotaData.setValue(LocalDate.now());
-        this.textSavePath.setText("C:\\Users\\George\\Desktop\\PDFsPE");
+        //this.textSavePath.setText("C:\\Users\\George\\Desktop\\PDFsPE");
 
         columnStudentNume.setCellValueFactory(new PropertyValueFactory<Student, String>("nume"));
         columnStudentPrenume.setCellValueFactory(new PropertyValueFactory<Student, String>("prenume"));
@@ -438,8 +439,10 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
         if (this.checkboxInvert.isSelected()) {
             List<Nota> grades = StreamSupport.stream(service.getAllNota().spliterator(), false).collect(Collectors.toList());
-            ;
-            List<Student> studenti = StreamSupport.stream(service.getAllStudent().spliterator(), false).collect(Collectors.toList());
+            List<Student> studenti = StreamSupport
+                    .stream(service.getAllStudent().spliterator(), false)
+                    .filter(x -> x.getCadruDidacticIndrumatorLab().equals(this.loggedInProfessor.toString()))
+                    .collect(Collectors.toList());
             List<Tema> teme = StreamSupport.stream(service.getAllTema().spliterator(), false).collect(Collectors.toList());
             gradeDTOList = new ArrayList<>();
             for (Student student : studenti) {
@@ -600,7 +603,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
                         if (rez == null) {
                             List<Student> toBeEmailed = new ArrayList<>();
                             toBeEmailed.add(s);
-                            SendEmailUtility.sendEmail(toBeEmailed, toBeAdded.toString());
+                            //TODO: SendEmailUtility.sendEmail(toBeEmailed, toBeAdded.toString());
                             StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost adaugata!");
                             handleclearFieldsNota();
 
@@ -695,15 +698,14 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
 
     public void handleSelectionChanged(MouseEvent mouseEvent) {
-        //NotaDTO nota = this.tableNota.getSelectionModel().getSelectedItem();
-        /*this.textNotaId.setText(nota.getIdNota());
+        NotaDTO nota = this.tableNota.getSelectionModel().getSelectedItem();
+        this.textNotaId.setText(nota.getIdNota());
         this.textNotaStudent.setText(nota.getS().toString());
         this.textNotaProf.setText(nota.getProfesor());
         this.textNotaValoare.setText(Integer.toString(nota.getValoare()));
         this.dateNotaData.setValue(LocalDate.parse(nota.getDataNota(), Constants.DATE_TIME_FORMATTER));
         this.textNotaFeedback.setText(nota.getFeedback());
-        this.textNotaTema.setText(nota.getT().toString());*/
-        //TODO: wtf happened here ???
+        this.textNotaTema.setText(nota.getT().toString());
     }
 
     public void handleClearFieldsNota(ActionEvent actionEvent) {
@@ -712,26 +714,14 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
 
     public void handleExport1(ActionEvent actionEvent) {
-        try {
-            List<Object> lines = this.service.raport1();
-            String title = "Nota la laborator pentru fiecare student";
-            String pdfName;
-            if(this.textFileName1.getText().isEmpty()){
-                pdfName = this.textFileName1.getPromptText();
-            }
-            else{
-                pdfName = this.textFileName1.getText();
-            }
-            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
-        } catch (IOException e) {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
-            //e.printStackTrace();
-        }
+        List<Object> lines = this.service.raport1(this.loggedInProfessor);
+        String title = "Nota la laborator pentru fiecare student";
+        String pdfName;
+        handleOpenFileChooserWithContent(title, lines);
     }
 
     public void handleExport2(ActionEvent actionEvent) {
-        try {
+        /*try {
             List<Object> lines = this.service.raport2();
             String title = "Cea mai grea tema";
             String pdfName;
@@ -746,50 +736,30 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         } catch (IOException e) {
             StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
             //e.printStackTrace();
-        }
+        }*/
+        List<Object> lines = this.service.raport2(this.loggedInProfessor);
+        String title = "Cea mai grea tema";
+        String pdfName;
+        handleOpenFileChooserWithContent(title, lines);
     }
 
     public void handleExport3(ActionEvent actionEvent) {
-        try {
-            List<Object> lines = this.service.raport3();
-            String title = "Studentii care pot intra in examen";
-            String pdfName;
-            if(this.textFileName3.getText().isEmpty()){
-                pdfName = this.textFileName3.getPromptText();
-            }
-            else{
-                pdfName = this.textFileName3.getText();
-            }
-            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, title, this.loggedInProfessor.toString(), lines);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
-        } catch (IOException e) {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
-            //e.printStackTrace();
-        }
+        List<Object> lines = this.service.raport3(this.loggedInProfessor);
+        String title = "Studentii care pot intra in examen";
+        String pdfName;
+        handleOpenFileChooserWithContent(title, lines);
     }
 
     public void handleExport4(ActionEvent actionEvent) {
-        try {
-            List<Object> lines = this.service.raport4();
-            String title = "Studentii care au predat la timp toate temele";
-            String pdfName;
-            if(this.textFileName4.getText().isEmpty()){
-                pdfName = this.textFileName4.getPromptText();
-            }
-            else{
-                pdfName = this.textFileName4.getText();
-            }
-            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, title, this.loggedInProfessor.toString(), lines);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
-        } catch (IOException e) {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
-            //e.printStackTrace();
-        }
+        List<Object> lines = this.service.raport4(this.loggedInProfessor);
+        String title = "Studentii care au predat la timp toate temele";
+        String pdfName;
+        handleOpenFileChooserWithContent(title, lines);
     }
 
-    public static void createPDFFromRaport(String pdfPath, String title, String subtitle, List<Object> lines) throws IOException {
+    private static void createPDFFromRaport(String pdfPath, String title, String subtitle, List<Object> lines) throws IOException {
         PDFont font = PDType1Font.HELVETICA;
-        int marginTop = 30;
+        int marginTop = 60;
         int fontSize = 18;
 
         final PDDocument doc = new PDDocument();
@@ -798,8 +768,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         doc.addPage(page);
 
         PDPageContentStream stream = new PDPageContentStream(doc, page);
-
-
 
         float subtitleWidth = font.getStringWidth(subtitle) / 1000 * fontSize;
         float subtitleHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
@@ -813,8 +781,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         stream.showText(subtitle);
         stream.endText();
 
-
-        marginTop = 60;
+        marginTop = 30;
         float titleWidth = font.getStringWidth(title) / 1000 * fontSize;
         float titleHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
 
@@ -826,9 +793,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         stream.newLineAtOffset(startX, startY);
         stream.showText(title);
         stream.endText();
-
-
-
 
         int tx = 50;
         int ty = 700;
@@ -846,24 +810,34 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
             ty -= 20;
         }
 
-
         stream.close();
         doc.save(new File(pdfPath));
-
     }
 
-    public void handleOpenFileChooser(ActionEvent actionEvent) {
-        final DirectoryChooser directoryChooser =
+
+    private void handleOpenFileChooserWithContent(String title, List<Object> lines) {
+        /*final DirectoryChooser directoryChooser =
                 new DirectoryChooser();
         final File selectedDirectory =
                 directoryChooser.showDialog(dialogStage);
         if (selectedDirectory != null) {
             this.textSavePath.setText(selectedDirectory.getAbsolutePath());
+        }*/
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save PDF");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PDF", "*.pdf")
+        );
+        File file = fileChooser.showSaveDialog(this.dialogStage);
+        if (file != null) {
+            try {
+                createPDFFromRaport(file.getAbsolutePath(), title, this.loggedInProfessor.toString(), lines);
+                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+            } catch (IOException ex) {
+                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "raportul a nu a putut fi salvat!");
+            }
         }
-        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
-        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
-        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
-        //TODO: instead of choosing the file path, i will create the file first, then i will open the dialog to let the user save it where they desire.
     }
 
 }

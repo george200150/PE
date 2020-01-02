@@ -134,6 +134,12 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 
     public Profesor addProfesor(Profesor entity) throws ValidationException {
+        if (StreamSupport.stream(this.getAllStudent().spliterator(),false).anyMatch(x -> x.getEmail().equals(entity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
+        if (StreamSupport.stream(this.getAllProfesor().spliterator(),false).anyMatch(x -> x.getEmail().equals(entity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
         Profesor r = profesorService.add(entity);
         if(r == null) {
             notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.ADD, entity));
@@ -150,6 +156,12 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 
     public Profesor updateProfesor(Profesor newEntity) {
+        if (StreamSupport.stream(this.getAllStudent().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
+        if (StreamSupport.stream(this.getAllProfesor().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
         Profesor oldProf = profesorService.findById(newEntity.getId());
         Profesor res = profesorService.update(newEntity);
         if(res == null) {
@@ -270,6 +282,12 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
         return studentService.getAll();
     }
     public Student addStudent(Student entity) throws ValidationException {
+        if (StreamSupport.stream(this.getAllStudent().spliterator(),false).anyMatch(x -> x.getEmail().equals(entity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
+        if (StreamSupport.stream(this.getAllProfesor().spliterator(),false).anyMatch(x -> x.getEmail().equals(entity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
         Student r = studentService.add(entity);
         if(r == null) {
             notifyObserversStudent(new StudentChangeEvent(ChangeEventType.ADD, entity));
@@ -284,6 +302,12 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
         return r;
     }
     public Student updateStudent(Student newEntity) {
+        if (StreamSupport.stream(this.getAllStudent().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
+        if (StreamSupport.stream(this.getAllProfesor().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
+            throw new ValidationException("MAIL DUPLICATE");
+        }
         Student oldStudent = studentService.findById(newEntity.getId());
         Student res = studentService.update(newEntity);
         if(res == null) {
@@ -385,9 +409,10 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     //Nota la laborator pentru fiecare student (media ponderata a notelor de la
     //temele de laborator;
     // pondere tema = nr de saptamani alocate temei)
-    public List<Object> raport1(){
+    public List<Object> raport1(Profesor profesor){
         Iterable<Nota> grades = getAllNota();
         List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered to have only logged in teacher's grades considered
                 .collect(Collectors.toList());
 
         List<NotaDTO> dtoList = gradeList.stream()
@@ -405,10 +430,11 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
                 .collect(Collectors.toList());
     }
 
-    public List<Object> raport2(){
+    public List<Object> raport2(Profesor profesor){
 
         Iterable<Nota> grades = getAllNota();
         List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered by professor
                 .collect(Collectors.toList());
 
         List<NotaDTO> dtoList = gradeList.stream()
@@ -435,10 +461,11 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 
     //Studentii care pot intra in examen (media mai mare sau egala cu 4)
-    public List<Object> raport3(){
+    public List<Object> raport3(Profesor profesor){
 
         return StreamSupport
                 .stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))//filtered by professor
                 .filter(x -> this.getMedieStudent(x) >= 4)
                 .collect(Collectors.toList());
     }
@@ -446,16 +473,17 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     private double getMedieStudent(Student student){
         List<Nota> noteStudent = StreamSupport
                 .stream(this.getAllNota().spliterator(),false)
-                .filter(x -> x.getId().split(":")[0].equals(student.getId()))
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))//filtered by professor
                 .collect(Collectors.toList());
         double nrNote = noteStudent.size();
         double sum = noteStudent.stream().mapToInt(Nota::getValoare).sum();
         return sum / nrNote;
     }
 
-    public List<Object> raport4(){
+    public List<Object> raport4(Profesor profesor){
         Iterable<Nota> grades = getAllNota();
         List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered by professor
                 .collect(Collectors.toList());
 
         List<NotaDTO> dtoList = gradeList.stream()
