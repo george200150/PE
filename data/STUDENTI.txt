@@ -1,7 +1,6 @@
-1;Lupsa;Corneliu;223;clir@scs.ubbcluj.ro;Profu '
-2;Iulian;Ditrau;212;email@email.email;Profu '
-3;Marian;Ioana;812;miie@scs.ubbro;Profu '
-4;Irimia;Larisa;821;larisika22@yahoo.com;Laptarul Nicolae
-5;Cincinescu;Cinci;555;cinci55@cinci.cinci;Profu '
-6;Lucaci;Ion;345;li@il.lil;Laptarul Nicolae
-7;Vasile;Ilie;111;ala@micu.rp;Gogoana Tu
+1;Lupsa;Corneliu;223;georgeciubotariu@yahoo.com;Profu '
+2;Iulian;Ditrau;212;georgeciubotariu@yahoo.com;Profu '
+3;Marian;Ioana;812;georgeciubotariu@yahoo.com;Profu '
+5;Cincinescu;Cinci;555;georgeciubotariu@yahoo.com;Profu '
+6;Lucaci;Ion;345;georgeciubotariu@yahoo.com;Laptarul Nicolae
+7;Vasile;Ilie;111;georgeciubotariu@yahoo.com;Gogoana Tu
