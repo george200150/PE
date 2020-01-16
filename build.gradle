@@ -16,12 +16,23 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     //compile files('lib/javax.mail.jar')
     compile group: 'javax.mail', name: 'javax.mail-api', version: '1.6.2'
+
     //compile files('lib/pdfbox.jar')
     compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.18'
+
     //compile files('lib/commons-logging-1.2.jar')
     compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
+
     //compile files('lib/fontbox-1.5.0.jar')
     compile group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.2'
+
     //"org.gradle.daemon=false"
     compile group: 'com.sun.mail', name: 'javax.mail', version: '1.5.2'
+
+    // https://mvnrepository.com/artifact/javax.mail/mail
+    compile group: 'javax.mail', name: 'mail', version: '1.4'
+
+    // https://mvnrepository.com/artifact/javax.activation/activation
+    compile group: 'javax.activation', name: 'activation', version: '1.1'
+
 }
