@@ -2,6 +2,7 @@ package domain;
 
 import utils.Constants;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -93,6 +94,13 @@ public class Tema extends Entity<String> {
     }
 
     public int getDuration(){
-        return Constants.getWeek(this.deadlineWeek) - Constants.getWeek(this.startWeek) + 1;
+        LocalDate strt = LocalDate.parse(this.startWeek,Constants.DATE_TIME_FORMATTER);
+        LocalDate dead = LocalDate.parse(this.deadlineWeek,Constants.DATE_TIME_FORMATTER);
+        if(strt.getYear() == dead.getYear()){
+            return Constants.getWeek(this.deadlineWeek) - Constants.getWeek(this.startWeek) + 1;
+        }
+        else{
+            return Constants.getWeek(this.deadlineWeek) - Constants.getWeek(this.startWeek) + 1 + 52;
+        }
     }
 }

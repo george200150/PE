@@ -3,15 +3,19 @@ package mvc.controllers;
 import domain.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -22,18 +26,20 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import services.MasterService;
 import utils.Constants;
-import utils.SendEmailUtility;
 import utils.events.GradeChangeEvent;
 import utils.observer.GradeObserver;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -84,13 +90,166 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     public Label labelProfesor;
 
     public CheckBox checkboxInvert;
-    //public TextField textSavePath;
 
-    /*public TextField textFileName1;
-    public TextField textFileName2;
-    public TextField textFileName3;
-    public TextField textFileName4;*/
+    public PieChart classesPieChart;
+    public PieChart itemsPieChart;
+    public PieChart itemsPieChart2;
+    public PieChart itemsPieChart3;
+    public PieChart itemsPieChart4;
+    public BarChart histo1;
+    public BarChart histo2;
+    public BarChart histo3;
+    public BarChart histo4;
 
+    public ToggleButton toggleCharts;
+    public AnchorPane anchor;
+
+    private void initializeClassesPieChart()
+    {
+        List<PieChart.Data> dataList = new ArrayList<>();
+        StreamSupport.stream(service.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(this.loggedInProfessor.toString()))
+                .collect(Collectors.groupingBy(Student::getGrupa, Collectors.counting()))
+                .forEach((x, y) -> dataList.add(new PieChart.Data(x.toString(), y)));
+        classesPieChart.setData(FXCollections.observableArrayList(dataList));
+        classesPieChart.setLabelLineLength(10);
+        classesPieChart.setLegendSide(Side.TOP);
+
+    }
+
+    private void pieChartRaport1() {
+        List<PieChart.Data> dataList = new ArrayList<>();
+        Map<Student, Double> l = this.service.getMediiStudenti(this.loggedInProfessor);
+        l.forEach((x, y) -> dataList.add(new PieChart.Data(x.toString(), y)));
+        itemsPieChart.setTitle("raport1");
+        itemsPieChart.setData(FXCollections.observableArrayList(dataList));
+        itemsPieChart.setLabelLineLength(10);
+        itemsPieChart.setLegendSide(Side.BOTTOM);
+    }
+
+    private void pieChartRaport2() {
+        List<PieChart.Data> dataList = new ArrayList<>();
+        Map<Tema, Double> l = this.service.getTemeGrele(this.loggedInProfessor);
+        l.forEach((x, y) -> dataList.add(new PieChart.Data(x.toString(), y)));
+        itemsPieChart2.setTitle("raport2");
+        itemsPieChart2.setData(FXCollections.observableArrayList(dataList));
+        itemsPieChart2.setLabelLineLength(10);
+        itemsPieChart2.setLegendSide(Side.BOTTOM);
+    }
+
+    private void pieChartRaport3() {
+        List<PieChart.Data> dataList = new ArrayList<>();
+        Map<String, Integer> l = this.service.getStudentiDupaStatusExamen(this.loggedInProfessor);
+        l.forEach((x, y) -> dataList.add(new PieChart.Data(x, y)));
+        itemsPieChart3.setTitle("raport3");
+        itemsPieChart3.setData(FXCollections.observableArrayList(dataList));
+        itemsPieChart3.setLabelLineLength(10);
+        itemsPieChart3.setLegendSide(Side.BOTTOM);
+    }
+
+    private void pieChartRaport4() {
+        List<PieChart.Data> dataList = new ArrayList<>();
+        Map<String, Integer> l = this.service.getStudentiPrompti(this.loggedInProfessor);
+        l.forEach((x, y) -> dataList.add(new PieChart.Data(x, y)));
+        itemsPieChart4.setTitle("raport4");
+        itemsPieChart4.setData(FXCollections.observableArrayList(dataList));
+        itemsPieChart4.setLabelLineLength(10);
+        itemsPieChart4.setLegendSide(Side.BOTTOM);
+    }
+
+    private void histoChartRaport1() {
+
+        List<WeightedAVGDTO> allStudentGrades = this.service.raport1Student(this.loggedInProfessor);
+        List<String> names = allStudentGrades.stream().map(x ->x.getS().toString()).collect(Collectors.toList());
+        List<Double> values = allStudentGrades.stream().map(x ->x.getAvg()).collect(Collectors.toList());
+        //Defining the axes
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setCategories(FXCollections.<String>
+                observableArrayList(names));
+        xAxis.setLabel("categorie");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("numar");
+        //Creating the Bar chart
+        histo1.setTitle("raport1");
+        //Prepare XYChart.Series objects by setting data
+        XYChart.Series<String, Number> series1 = new XYChart.Series<>();
+        series1.setName("Studentii dumneavoastra");
+
+        for (int i = 0; i < names.size(); i++) {
+            series1.getData().add(new XYChart.Data<>(names.get(i), values.get(i)));
+        }
+        //Setting the data to bar chart
+        histo1.getData().addAll(series1);
+    }
+
+    private void histoChartRaport2() {
+        //Defining the axes
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setCategories(FXCollections.<String>
+                observableArrayList(Arrays.asList("0-4", "5-7", "8-10")));
+        xAxis.setLabel("nota");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("numar");
+        //Creating the Bar chart
+        histo2.setTitle("raport2");
+        long count04 = (long) this.service.getTemeGrele(this.loggedInProfessor).entrySet().stream().filter(x -> x.getValue() <= 4).count();
+        long count57 = (long) this.service.getTemeGrele(this.loggedInProfessor).entrySet().stream().filter(x -> x.getValue() > 4 && x.getValue() <= 7).count();
+        long count810 = (long) this.service.getTemeGrele(this.loggedInProfessor).entrySet().stream().filter(x -> x.getValue() > 7).count();
+
+
+        //Prepare XYChart.Series objects by setting data
+        XYChart.Series<String, Number> series1 = new XYChart.Series<>();
+        series1.setName("Temele existente");
+        series1.getData().add(new XYChart.Data<>("0-4", count04));
+        series1.getData().add(new XYChart.Data<>("5-7", count57));
+        series1.getData().add(new XYChart.Data<>("8-10", count810));
+        //Setting the data to bar chart
+        histo2.getData().addAll(series1);
+    }
+
+    private void histoChartRaport3() {
+        //Defining the axes
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setCategories(FXCollections.<String>
+                observableArrayList(Arrays.asList("Promovat", "Corigent")));
+        xAxis.setLabel("categorie");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("numar");
+        //Creating the Bar chart
+        histo3.setTitle("raport3");
+        long countOk = (long) this.service.raport3(this.loggedInProfessor).size();
+        long countALL = StreamSupport.stream(this.service.getAllStudent().spliterator(), false).filter(x -> x.getCadruDidacticIndrumatorLab().equals(this.loggedInProfessor.toString())).count();
+        long countNOT = countALL - countOk;
+        //Prepare XYChart.Series objects by setting data
+        XYChart.Series<String, Number> series1 = new XYChart.Series<>();
+        series1.setName("Studentii dumneavoastra");
+        series1.getData().add(new XYChart.Data<>("Promovat", countOk));
+        series1.getData().add(new XYChart.Data<>("Corigent", countNOT));
+        //Setting the data to bar chart
+        histo3.getData().addAll(series1);
+    }
+
+    private void histoChartRaport4() {// Studentii care au predat la timp toate temele
+        //Defining the axes
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setCategories(FXCollections.<String>
+                observableArrayList(Arrays.asList("La Timp", "Intarziat")));
+        xAxis.setLabel("categorie");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("numar");
+        //Creating the Bar chart
+        histo4.setTitle("raport4");
+        long countOk = (long) this.service.raport4(this.loggedInProfessor).size();
+        long countALL = StreamSupport.stream(this.service.getAllStudent().spliterator(), false).filter(x -> x.getCadruDidacticIndrumatorLab().equals(this.loggedInProfessor.toString())).count();
+        long countNOT = countALL - countOk;
+        //Prepare XYChart.Series objects by setting data
+        XYChart.Series<String, Number> series1 = new XYChart.Series<>();
+        series1.setName("Studentii dumneavoastra");
+        series1.getData().add(new XYChart.Data<>("La Timp", countOk));
+        series1.getData().add(new XYChart.Data<>("Intarziat", countNOT));
+        //Setting the data to bar chart
+        histo4.getData().addAll(series1);
+    }
 
 
     private MasterService service;
@@ -113,6 +272,23 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         this.labelProfesor.setText(this.loggedInProfessor.toString());
         this.textNotaProf.setText(this.loggedInProfessor.toString());
         this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
+
+        initializeClassesPieChart();
+
+        //by default -> bar graphs
+        histoChartRaport1();
+        histoChartRaport2();
+        histoChartRaport3();
+        histoChartRaport4();
+
+        pieChartRaport1();
+        pieChartRaport2();
+        pieChartRaport3();
+        pieChartRaport4();
+        itemsPieChart.setVisible(false);
+        itemsPieChart2.setVisible(false);
+        itemsPieChart3.setVisible(false);
+        itemsPieChart4.setVisible(false);
     }
 
 
@@ -357,6 +533,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     @FXML
     public void initialize() {
         this.dateNotaData.setValue(LocalDate.now());
+        this.toggleCharts.setSelected(true);
         //this.textSavePath.setText("C:\\Users\\George\\Desktop\\PDFsPE");
 
         columnStudentNume.setCellValueFactory(new PropertyValueFactory<Student, String>("nume"));
@@ -465,13 +642,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         }
 
         Predicate<NotaDTO> filtered = null;// asa compunem predicatele
-        /*Predicate<NotaDTO> filterData = x -> {
-            String text = dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER);
-            if (text.isEmpty()) {
-                return true;
-            }
-            return x.getDataNota().toLowerCase().contains(text.toLowerCase());
-        };*/
+
         Predicate<NotaDTO> filterProfesor = x -> {
             String text = textNotaProf.getText();
             if (text.isEmpty()) {
@@ -721,22 +892,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     }
 
     public void handleExport2(ActionEvent actionEvent) {
-        /*try {
-            List<Object> lines = this.service.raport2();
-            String title = "Cea mai grea tema";
-            String pdfName;
-            if(this.textFileName2.getText().isEmpty()){
-                pdfName = this.textFileName2.getPromptText();
-            }
-            else{
-                pdfName = this.textFileName2.getText();
-            }
-            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
-        } catch (IOException e) {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
-            //e.printStackTrace();
-        }*/
         List<Object> lines = this.service.raport2(this.loggedInProfessor);
         String title = "Cea mai grea tema";
         String pdfName;
@@ -757,7 +912,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         handleOpenFileChooserWithContent(title, lines);
     }
 
-    private static void createPDFFromRaport(String pdfPath, String title, String subtitle, List<Object> lines) throws IOException {
+    private void createPDFFromRaport(String pdfPath, String title, String subtitle, List<Object> lines) throws IOException {
         PDFont font = PDType1Font.HELVETICA;
         int marginTop = 60;
         int fontSize = 18;
@@ -811,19 +966,41 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         }
 
         stream.close();
+
+
+
+
+        WritableImage snapshot = this.anchor.snapshot(new SnapshotParameters(), null);
+
+        String path = "C:\\Users\\George\\Desktop\\PDFsPE\\ceva.png";
+        File file = new File(path);
+
+        ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", file);
+
+
+        PDRectangle rect = new PDRectangle(980,560);
+        PDPage page1 = new PDPage(rect);
+        doc.addPage(page1);
+
+        PDImageXObject pdImage = PDImageXObject.createFromFile(path, doc);
+
+        try (PDPageContentStream contentStream = new PDPageContentStream(doc,
+                page1,
+                PDPageContentStream.AppendMode.APPEND,
+                true,
+                true))
+        {
+            contentStream.drawImage(pdImage, 0, 0, 980, 560);
+        }
+        doc.save(pdfPath);
+
+        file.delete();
+
         doc.save(new File(pdfPath));
     }
 
 
     private void handleOpenFileChooserWithContent(String title, List<Object> lines) {
-        /*final DirectoryChooser directoryChooser =
-                new DirectoryChooser();
-        final File selectedDirectory =
-                directoryChooser.showDialog(dialogStage);
-        if (selectedDirectory != null) {
-            this.textSavePath.setText(selectedDirectory.getAbsolutePath());
-        }*/
-
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save PDF");
         fileChooser.getExtensionFilters().addAll(
@@ -840,4 +1017,60 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         }
     }
 
+
+    public void handleChangeRadio(ActionEvent actionEvent) {
+        if(toggleCharts.isSelected()){
+            toggleCharts.setText("   PIE   ");
+
+            itemsPieChart.setVisible(false);
+            itemsPieChart2.setVisible(false);
+            itemsPieChart3.setVisible(false);
+            itemsPieChart4.setVisible(false);
+
+            histo1.setVisible(true);
+            histo2.setVisible(true);
+            histo3.setVisible(true);
+            histo4.setVisible(true);
+        }
+        else{
+            toggleCharts.setText("HISTO");
+
+            histo1.setVisible(false);
+            histo2.setVisible(false);
+            histo3.setVisible(false);
+            histo4.setVisible(false);
+
+            itemsPieChart.setVisible(true);
+            itemsPieChart2.setVisible(true);
+            itemsPieChart3.setVisible(true);
+            itemsPieChart4.setVisible(true);
+        }
+    }
 }
+
+
+
+        /*try {
+            List<Object> lines = this.service.raport2();
+            String title = "Cea mai grea tema";
+            String pdfName;
+            if(this.textFileName2.getText().isEmpty()){
+                pdfName = this.textFileName2.getPromptText();
+            }
+            else{
+                pdfName = this.textFileName2.getText();
+            }
+            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
+            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+        } catch (IOException e) {
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
+            //e.printStackTrace();
+        }*/
+
+        /*final DirectoryChooser directoryChooser =
+                new DirectoryChooser();
+        final File selectedDirectory =
+                directoryChooser.showDialog(dialogStage);
+        if (selectedDirectory != null) {
+            this.textSavePath.setText(selectedDirectory.getAbsolutePath());
+        }*/

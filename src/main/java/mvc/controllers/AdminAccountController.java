@@ -92,6 +92,22 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
 
 
     public TextField textAdminParola;
+    public TextField textFieldStudentId;
+    public TextField textFieldStudentNume;
+    public TextField textFieldStudentPrenume;
+    public TextField textFieldStudentGrupa;
+    public TextField textFieldStudentEmail;
+    public TextField textFieldStudentProf;
+    public TextField textFieldTemaId;
+    public TextField textFieldTemaNume;
+    public TextField textFieldTemaDescriere;
+    public DatePicker datePickerTemaStart;
+    public DatePicker datePickerTemaStop;
+    public TextField textFieldNotaId;
+    public DatePicker datePickerNotaData;
+    public TextField textFieldNotaProf;
+    public TextField textFieldNotaValoare;
+    public TextField textFieldNotaFeedback;
 
 
     private MasterService service;
@@ -815,28 +831,50 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
             StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"Resetare","parola a fost actualizata!");
         }
         else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Log In","parola nu a putut fi actualizata!");
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Resetare","parola nu a putut fi actualizata!");
         }
     }
 
 
 
-    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
-    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
-    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
-    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
-    //TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele//TODO: lucrul cu notele
     public void handleClearFieldsGrade(ActionEvent actionEvent) {
-
+        this.textFieldNotaFeedback.setText("");
+        this.textFieldNotaId.setText("");
+        this.textFieldNotaProf.setText("");
+        this.textFieldNotaValoare.setText("");
+        this.textFieldStudentEmail.setText("");
+        this.textFieldStudentGrupa.setText("");
+        this.textFieldStudentId.setText("");
+        this.textFieldStudentNume.setText("");
+        this.textFieldStudentPrenume.setText("");
+        this.textFieldStudentProf.setText("");
+        this.textFieldTemaDescriere.setText("");
+        this.textFieldTemaId.setText("");
+        this.textFieldTemaNume.setText("");
+        this.datePickerNotaData.setValue(null);
+        this.datePickerTemaStart.setValue(null);
+        this.datePickerTemaStop.setValue(null);
     }
 
-
-
-
-
-
-
-
+    public void handleDelete(ActionEvent actionEvent) {
+        NotaDTO n = this.tableNote.getSelectionModel().getSelectedItem();
+        if(n == null){
+            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","Nu ati selectat din tabel o nota!");
+        }
+        else {
+            Nota rez = this.service.removeByIdNota(n.getIdNota());
+            if (rez == null) {
+                StudentAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","Nota nu a putut fi stearsa!");
+            } else {
+                StudentAlert.showMessage(null, Alert.AlertType.CONFIRMATION,"stergere","Nota a fost stearsa cu succes!");
+                //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
+                //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
+                //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
+                //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
+                //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
+            }
+        }
+    }
 
 
     @Override
@@ -889,6 +927,28 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
             this.textNumeProf.setText(profesorDTO.getNume());
             this.textEmailProf.setText(profesorDTO.getEmail());
             this.textParolaProf.setText(profesorDTO.getPassword());
+        }
+    }
+
+    public void handleLoadModelNote(MouseEvent mouseEvent) {
+        NotaDTO notaDTO = this.tableNote.getSelectionModel().getSelectedItem();
+        if(notaDTO != null){
+            this.textFieldNotaFeedback.setText(notaDTO.getFeedback());
+            this.textFieldNotaId.setText(notaDTO.getIdNota());
+            this.textFieldNotaProf.setText(notaDTO.getProfesor());
+            this.textFieldNotaValoare.setText(Integer.toString(notaDTO.getValoare()));
+            this.textFieldStudentEmail.setText(notaDTO.getEmailStudent());
+            this.textFieldStudentGrupa.setText(Integer.toString(notaDTO.getGrupaStudent()));
+            this.textFieldStudentId.setText(notaDTO.getIdStudent());
+            this.textFieldStudentNume.setText(notaDTO.getNumeStudent());
+            this.textFieldStudentPrenume.setText(notaDTO.getPrenumeStudent());
+            this.textFieldStudentProf.setText(notaDTO.getProfesor());
+            this.textFieldTemaDescriere.setText(notaDTO.getDescriereTema());
+            this.textFieldTemaId.setText(notaDTO.getIdTema());
+            this.textFieldTemaNume.setText(notaDTO.getNumeTema());
+            this.datePickerNotaData.setValue(LocalDate.parse(notaDTO.getDataNota(),Constants.DATE_TIME_FORMATTER));
+            this.datePickerTemaStart.setValue(LocalDate.parse(notaDTO.getStartTema(),Constants.DATE_TIME_FORMATTER));
+            this.datePickerTemaStop.setValue(LocalDate.parse(notaDTO.getDeadlineTema(),Constants.DATE_TIME_FORMATTER));
         }
     }
 }
