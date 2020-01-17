@@ -34,7 +34,7 @@ public class ProfesorDataBaseRepository implements CrudRepository<String, Profes
         if (id == null)
             throw new IllegalArgumentException("ID-ul NU POATE FI NULL");
         try {
-            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Profesori\"  WHERE id =" + id);
+            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Profesori\"  WHERE id =" + "\'" +  id + "\'");
             data.next();
             return new Profesor(data.getString(1), data.getString(2), data.getString(3), data.getString(4));
         }
@@ -44,7 +44,7 @@ public class ProfesorDataBaseRepository implements CrudRepository<String, Profes
     }
 
     @Override
-    public Iterable<Profesor> findAll() {
+    public Iterable<Profesor> findAll() {//TODO: id nume prenume email
         List<Profesor> lst = new ArrayList<>();
         try {
             ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Profesori\"");
@@ -88,7 +88,7 @@ public class ProfesorDataBaseRepository implements CrudRepository<String, Profes
         if (entity != null) {
             try {
                 connection.createStatement()
-                        .execute("DELETE FROM \"Profesori\" WHERE id = " + id);
+                        .execute("DELETE FROM \"Profesori\" WHERE id = " + "\'" +  id + "\'");
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -106,9 +106,9 @@ public class ProfesorDataBaseRepository implements CrudRepository<String, Profes
             Profesor old = findOne(entity.getId());
             try {
                 connection.createStatement().execute("UPDATE \"Teme\" SET " +
-                        ",nume = \'" + entity.getNume() + "\'" +
+                        "nume = \'" + entity.getNume() + "\'" +
                         ",\"prenume\" = \'" + entity.getPrenume() + "\'" +
-                        ",\"email\" = \'" + entity.getEmail() + "\'" + "WHERE id =" + entity.getId()
+                        ",\"email\" = \'" + entity.getEmail() + "\'" + "WHERE id =" + "\'" + entity.getId() + "\'"
                 );
             } catch (SQLException e) {
                 e.printStackTrace();

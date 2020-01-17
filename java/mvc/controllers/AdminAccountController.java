@@ -572,7 +572,7 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
             teme.remove(except);
         }
         LocalDate is2 = LocalDate.parse(tema.getStartWeek(), Constants.DATE_TIME_FORMATTER);
-        LocalDate ie2 = LocalDate.parse(tema.getStartWeek(), Constants.DATE_TIME_FORMATTER);
+        LocalDate ie2 = LocalDate.parse(tema.getDeadlineWeek(), Constants.DATE_TIME_FORMATTER);
 
         for (Tema t: teme) {
             LocalDate is1 = LocalDate.parse(t.getStartWeek(), Constants.DATE_TIME_FORMATTER);

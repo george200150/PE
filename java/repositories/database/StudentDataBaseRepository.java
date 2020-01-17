@@ -34,7 +34,7 @@ public class StudentDataBaseRepository implements CrudRepository<String, Student
         if (id == null)
             throw new IllegalArgumentException("ID-ul NU POATE FI NULL");
         try {
-            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Studenti\"  WHERE id =" + id);
+            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Studenti\"  WHERE id =" + "\'" +  id + "\'");
             data.next();
             //String id = data.getString(1);
             String nume = data.getString(2);
@@ -80,7 +80,7 @@ public class StudentDataBaseRepository implements CrudRepository<String, Student
             throw new ValidationException("DUPLICAT GASIT!");
         }
 
-        try {//todo: check one more time equivalence of abstractInMemoryRepo and DBRepo
+        try {
 /*            INSERT INTO public."Studenti"(
                     id, nume, prenume, email, "cadruDidacticIndrumatorLab", grupa)
             VALUES (?, ?, ?, ?, ?, ?)*/
@@ -102,7 +102,7 @@ public class StudentDataBaseRepository implements CrudRepository<String, Student
         if (student != null) {
             try {
                 connection.createStatement()
-                        .execute("DELETE FROM \"Studenti\" WHERE id = " + id);
+                        .execute("DELETE FROM \"Studenti\" WHERE id = " + "\'" +  id + "\'");
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -124,7 +124,7 @@ public class StudentDataBaseRepository implements CrudRepository<String, Student
                         ",prenume = \'" + entity.getPrenume() + "\'" +
                         ",\"grupa\" = \'" + entity.getGrupa() + "\'" +
                         ",email = \'" + entity.getEmail() + "\'" +
-                        ",\"cadruDidacticIndrumatorLab\" = \'" + entity.getCadruDidacticIndrumatorLab() + "\'" + "WHERE id =" + entity.getId()
+                        ",\"cadruDidacticIndrumatorLab\" = \'" + entity.getCadruDidacticIndrumatorLab() + "\'" + "WHERE id =" + "\'" + entity.getId() + "\'"
                 );
             } catch (SQLException e) {
                 e.printStackTrace();

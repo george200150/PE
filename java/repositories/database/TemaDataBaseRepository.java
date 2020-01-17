@@ -34,9 +34,15 @@ public class TemaDataBaseRepository implements CrudRepository<String, Tema> {
         if (id == null)
             throw new IllegalArgumentException("ID-ul NU POATE FI NULL");
         try {
-            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Teme\"  WHERE id =" + id);
+            //BAD QUERY !!! =: ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Teme\"  WHERE id =" + "\"id\"");
+            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Teme\"  WHERE id =" + "\'" +  id + "\'");
             data.next();
-            return new Tema(data.getString(1), data.getString(2), data.getString(3), data.getString(4), data.getString(5));
+            String id2 = data.getString(1);
+            String nume = data.getString(2);
+            String descriere = data.getString(3);
+            String start = data.getString(4);
+            String stop = data.getString(5);
+            return new Tema(id, nume, descriere, start, stop);
         }
         catch (SQLException ignored) {
             return null;
@@ -88,7 +94,7 @@ public class TemaDataBaseRepository implements CrudRepository<String, Tema> {
         if (entity != null) {
             try {
                 connection.createStatement()
-                        .execute("DELETE FROM \"Teme\" WHERE id = " + id);
+                        .execute("DELETE FROM \"Teme\" WHERE id = " + "\'" +  id + "\'");
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -106,10 +112,10 @@ public class TemaDataBaseRepository implements CrudRepository<String, Tema> {
             Tema old = findOne(entity.getId());
             try {
                 connection.createStatement().execute("UPDATE \"Teme\" SET " +
-                        ",nume = \'" + entity.getNume() + "\'" +
+                        "nume = \'" + entity.getNume() + "\'" +
                         ",\"descriere\" = \'" + entity.getDescriere() + "\'" +
                         ",\"startWeek\" = \'" + entity.getStartWeek() + "\'" +
-                        ",\"deadlineWeek\" = \'" + entity.getDeadlineWeek() + "\'" + "WHERE id =" + entity.getId()
+                        ",\"deadlineWeek\" = \'" + entity.getDeadlineWeek() + "\'" + "WHERE id =" + "\'" + entity.getId() + "\'"
                 );
             } catch (SQLException e) {
                 e.printStackTrace();

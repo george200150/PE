@@ -10,6 +10,7 @@ import java.util.Date;
 
 public class Constants {
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_DB = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static final String startSemester = "30/09/2019";//TODO : CONFIG FILE (but how? --- static final --- )
     public static final String beginHolyday = "23/12/2019";
@@ -99,6 +100,8 @@ public class Constants {
 
 
     public static int getIntervalsNumberOfCommonWeeks(LocalDate is1, LocalDate ie1, LocalDate is2, LocalDate ie2){
+        if(ie1.compareTo(is2) < 0 || ie2.compareTo(is1) < 0)
+            return 0;
         //we will use this functions only when intervals are not disjoint
         //(is1 < [is2 < ie1) < ie2] (ok)
         if(is1.compareTo(is2) <= 0 && ie1.compareTo(ie2) <= 0) {
@@ -136,8 +139,8 @@ public class Constants {
             }
             return w2 - w1 + 1;
         }
-        throw new Error("FALEU MAICA, CE FACUSI?!");
-        //return 0;
+        //throw new Error("FALEU MAICA, CE FACUSI?!");
+        throw new IllegalArgumentException("INTERVAL GRESIT!");
     }
 
 }

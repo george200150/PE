@@ -41,18 +41,4 @@ public class NotaService implements Service<String, Nota>/*, Observable<GradeCha
         return notaRepository.update(entity);
     }
 
-    /*@Override
-    public void addObserver(Observer<GradeChangeEvent> e) {
-        observers.add(e);
-    }
-
-    @Override
-    public void removeObserver(Observer<GradeChangeEvent> e) {
-        observers.remove(e);
-    }
-
-    @Override
-    public void notifyObservers(GradeChangeEvent t) {
-        observers.forEach(x->x.update(t));
-    }*/
 }

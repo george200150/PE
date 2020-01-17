@@ -34,7 +34,7 @@ public class NotaDataBaseRepository implements CrudRepository<String, Nota> {
         if (id == null)
             throw new IllegalArgumentException("ID-ul NU POATE FI NULL");
         try {
-            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Note\"  WHERE id =" + id);
+            ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Note\"  WHERE id =" + "\'" +  id + "\'");
             data.next();
             return new Nota(data.getString(1), Integer.parseInt(data.getString(2)), data.getString(3), data.getString(4), data.getString(5));
         }
@@ -44,7 +44,7 @@ public class NotaDataBaseRepository implements CrudRepository<String, Nota> {
     }
 
     @Override
-    public Iterable<Nota> findAll() {
+    public Iterable<Nota> findAll() {//TODO: id valoare prof data feedback
         List<Nota> lst = new ArrayList<>();
         try {
             ResultSet data = connection.createStatement().executeQuery("SELECT * FROM \"Note\"");
@@ -70,8 +70,8 @@ public class NotaDataBaseRepository implements CrudRepository<String, Nota> {
         }
 
         try {
-            connection.createStatement().execute("INSERT INTO \"Note\" VALUES (" +
-                    entity.getId() + ",\'" + entity.getValoare() + "\',\'" + entity.getProfesor() + "\',\'" +
+            connection.createStatement().execute("INSERT INTO \"Note\" VALUES (\'" +
+                    entity.getId() + "\',\'" + entity.getValoare() + "\',\'" + entity.getProfesor() + "\',\'" +
                     entity.getData() + "\',\'" + entity.getFeedback() + "\')"
             );
         } catch (SQLException e) {
@@ -88,7 +88,7 @@ public class NotaDataBaseRepository implements CrudRepository<String, Nota> {
         if (entity != null) {
             try {
                 connection.createStatement()
-                        .execute("DELETE FROM \"Note\" WHERE id = " + id);
+                        .execute("DELETE FROM \"Note\" WHERE id = " + "\'" +  id + "\'");
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -110,7 +110,7 @@ public class NotaDataBaseRepository implements CrudRepository<String, Nota> {
                         ",valoare = \'" + entity.getValoare() + "\'" +
                         ",\"profesor\" = \'" + entity.getProfesor() + "\'" +
                         ",\"data\" = \'" + entity.getData() + "\'" +
-                        ",\"feedback\" = \'" + entity.getFeedback() + "\'" + "WHERE id =" + entity.getId()
+                        ",\"feedback\" = \'" + entity.getFeedback() + "\'" + "WHERE id =" + "\'" + entity.getId() + "\'"
                 );
             } catch (SQLException e) {
                 e.printStackTrace();
