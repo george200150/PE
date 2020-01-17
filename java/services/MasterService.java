@@ -155,9 +155,7 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
         if (StreamSupport.stream(this.getAllStudent().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
             throw new ValidationException("MAIL DUPLICATE");
         }
-        List<Profesor> profesorList = StreamSupport.stream(this.getAllProfesor().spliterator(), false).collect(Collectors.toList());
-        profesorList.remove(newEntity);//remember to exclude self.
-        if (profesorList.stream().anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
+        if (StreamSupport.stream(this.getAllProfesor().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
             throw new ValidationException("MAIL DUPLICATE");
         }
         Profesor oldProf = profesorService.findById(newEntity.getId());
@@ -208,19 +206,11 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 
     public boolean changeStudentPassword(String user, String oldp, String newp){
-        boolean val = this.loginCredentialsProxy.changeStudentPassword(user, oldp, newp);
-        if(val){
-            notifyObserversStudent(new StudentChangeEvent(ChangeEventType.ADD, null));
-        }
-        return val;
+        return this.loginCredentialsProxy.changeStudentPassword(user, oldp, newp);
     }
 
     public boolean changeProfessorPassword(String user, String oldp, String newp){
-        boolean val = this.loginCredentialsProxy.changeProfessorPassword(user, oldp, newp);
-        if(val){
-            notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.ADD, null));
-        }
-        return val;
+        return this.loginCredentialsProxy.changeProfessorPassword(user, oldp, newp);
     }
 
     public boolean changeAdminPassword(String newp){
@@ -234,22 +224,18 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
 
     public void addStudentPSSWD(Student student, String psswd){
         this.loginCredentialsProxy.addStudentPSSWD(student, psswd);
-        this.notifyObserversStudent(new StudentChangeEvent(ChangeEventType.ADD, null));
     }
 
     public void addProfesorPSSWD(Profesor profesor, String psswd){
         this.loginCredentialsProxy.addProfesorPSSWD(profesor, psswd);
-        notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.ADD, null));
     }
 
     public void updateStudentPSSWD(Student student, String psswd){
         this.loginCredentialsProxy.updateStudentPSSWD(student, psswd);
-        notifyObserversStudent(new StudentChangeEvent(ChangeEventType.ADD, null));
     }
 
     public void updateProfesorPSSWD(Profesor profesor, String psswd){
         this.loginCredentialsProxy.updateProfesorPSSWD(profesor, psswd);
-        notifyObserversProf(new ProfesorChangeEvent(ChangeEventType.ADD, null));
     }
 
 
@@ -305,9 +291,7 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
         return r;
     }
     public Student updateStudent(Student newEntity) {
-        List<Student> studentStream = StreamSupport.stream(this.getAllStudent().spliterator(), false).collect(Collectors.toList());
-        studentStream.remove(newEntity);//remember to exclude self.
-        if (studentStream.stream().anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
+        if (StreamSupport.stream(this.getAllStudent().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
             throw new ValidationException("MAIL DUPLICATE");
         }
         if (StreamSupport.stream(this.getAllProfesor().spliterator(),false).anyMatch(x -> x.getEmail().equals(newEntity.getEmail()))){//DO NOT REPEAT MAIL
@@ -400,7 +384,7 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
                 .collect(Collectors.groupingBy(NotaDTO::getS));
 
         Map<Student, Double> mediileStudentilor = dtoMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(this::compGrade).sum()));
+                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(sub -> (sub.getValoare() * (double) (sub.getT().getDuration())) / 14).sum()));
 
         return mediileStudentilor.entrySet().stream()
                 .map(x -> new WeightedAVGDTO(x.getKey(), x.getValue()))
@@ -410,9 +394,9 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     //Nota la laborator pentru fiecare student (media ponderata a notelor de la
     //temele de laborator;
     // pondere tema = nr de saptamani alocate temei)
-    public Double compGrade(NotaDTO sub){
+    private Double func(NotaDTO sub){
         int value = sub.getValoare();
-        int duration = sub.getT().getDuration() - 1;
+        int duration = sub.getT().getDuration();
         double val = (value * (double) (duration)) / 14;
         return val;
     }
@@ -432,7 +416,7 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
 
         //Map<Student, Double> mediileStudentilor = getMediiStudenti(profesor);
         Map<Student, Double> mediileStudentilor = dtoMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(this::compGrade).sum()));
+                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(this::func).sum()));
 
 
         return mediileStudentilor.entrySet().stream()
@@ -489,7 +473,7 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
         List<NotaDTO> dtos = noteStudent.stream().map(this::getDTOFromNota).collect(Collectors.toList());
 
 
-        double media = dtos.stream().mapToDouble(this::compGrade).sum();
+        double media = dtos.stream().mapToDouble(this::func).sum();
         return media;
     }
 
@@ -667,3 +651,54 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 }
 
+/*Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered by professor
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtos = gradeList.stream().map(this::getDTOFromNota).collect(Collectors.toList());
+
+        Map<Student, List<NotaDTO>> gradesOfEachStudent = dtos.stream().collect(Collectors.groupingBy(NotaDTO::getS));
+
+        return gradesOfEachStudent.entrySet().stream()
+                .collect(Collectors.toMap(x -> isPunctual(x), Collectors.counting()));
+
+        /*List<Student> prompts = gradesOfEachStudent.entrySet().stream()
+                .filter(pair -> isPunctual(pair.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());*/
+
+
+/*
+    private void writeToFile(Nota nota, String feedback){
+        String[] ids = nota.getId().split(":");
+        Student student = this.studentService.findById(ids[0]);
+        Tema tema = this.temaService.findById(ids[1]);
+
+
+        Path path = Paths.get("files/" + student.getNume() + "_" + student.getPrenume() + ".txt");
+
+
+        String one = "TEMA: " + tema.getNume();
+        String two = "NOTA: " + nota.getValoare();
+        String three = "PREDATA IN SAPTAMANA: " + nota.getData();
+        String four = "DEADLINE: " + tema.getDeadlineWeek();
+        String five = "FEEDBACK: " + feedback;
+
+        String all = one + "\n" + two + "\n" + three + "\n" + four + ";\n" + five;
+        List<String> lines = Arrays.asList(all);
+
+        try {
+            Files.write(path, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();//TODO: o sa cream fisierul doar daca nu exista (...?cum?...)
+        }
+    }*/
+
+/*List<Nota> noteStudent = StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))//filtered by professor
+                .collect(Collectors.toList());
+        double nrNote = noteStudent.size();
+        double sum = noteStudent.stream().mapToInt(Nota::getValoare).sum();
+        return sum / nrNote;*/

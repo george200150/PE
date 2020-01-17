@@ -18,11 +18,11 @@ public class Motivation extends Entity<String> {
     private String studentToString;
 
 
-    public Motivation(String id, String idStudent, String nume, String prenume, int grupa, String email, String profesor, LocalDate start, LocalDate end) {
-        this.student = new Student(idStudent, nume, prenume, grupa, email, profesor);
+    public Motivation(String id, String nume, String prenume, int grupa, String email, String profesor, LocalDate start, LocalDate end) {
+        this.student = new Student(id, nume, prenume, grupa, email, profesor);
         this.interval = new Interval(start, end);
 
-        this.idStudent = idStudent;
+        this.idStudent = id;
         this.numeStudent = nume;
         this.prenumeStudent = prenume;
         this.grupaStudent = grupa;
@@ -31,7 +31,7 @@ public class Motivation extends Entity<String> {
 
         this.intervalToString = interval.toString();
         this.studentToString = student.toString();
-        this.id = this.idStudent + " " + this.interval.toString();
+        this.id = this.idStudent + this.interval.toString();
     }
 
     public Motivation(Student student, LocalDate start, LocalDate end) {
@@ -47,7 +47,7 @@ public class Motivation extends Entity<String> {
 
         this.intervalToString = interval.toString();
         this.studentToString = student.toString();
-        this.id = this.idStudent + " " + this.interval.toString();
+        this.id = this.idStudent + this.interval.toString();
     }
 
     @Override

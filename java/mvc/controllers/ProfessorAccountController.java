@@ -30,6 +30,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import services.MasterService;
 import utils.Constants;
+import utils.SendEmailUtility;
 import utils.events.GradeChangeEvent;
 import utils.events.MotivationChangeEvent;
 import utils.observer.GradeObserver;
@@ -188,7 +189,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
             series1.getData().add(new XYChart.Data<>(names.get(i), values.get(i)));
         }
         //Setting the data to bar chart
-        histo1.getData().clear();
         histo1.getData().addAll(series1);
     }
 
@@ -214,7 +214,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         series1.getData().add(new XYChart.Data<>("5-7", count57));
         series1.getData().add(new XYChart.Data<>("8-10", count810));
         //Setting the data to bar chart
-        histo2.getData().clear();
         histo2.getData().addAll(series1);
     }
 
@@ -237,7 +236,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         series1.getData().add(new XYChart.Data<>("Promovat", countOk));
         series1.getData().add(new XYChart.Data<>("Corigent", countNOT));
         //Setting the data to bar chart
-        histo3.getData().clear();
         histo3.getData().addAll(series1);
     }
 
@@ -260,7 +258,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         series1.getData().add(new XYChart.Data<>("La Timp", countOk));
         series1.getData().add(new XYChart.Data<>("Intarziat", countNOT));
         //Setting the data to bar chart
-        histo4.getData().clear();
         histo4.getData().addAll(series1);
     }
 
@@ -447,16 +444,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
     private void recomputeGrades() {
         if (this.tableNota.getSelectionModel().getSelectedItem() == null) {
-            //TODO: removed for testing UX this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
-            if(!this.textNotaId.getText().isEmpty()){
-                String[] id = this.textNotaId.getText().split(":");
-                Student s = this.service.findByIdStudent(id[0]);
-                Tema t = this.service.findByIdTema(id[1]);
-                String date = this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER);
-                int val = this.computeMaxGrade(s, t, date);
-                this.textNotaValoare.setText(Integer.toString(val));
-                this.textNotaFeedback.setText(this.computeFeedback(s, t, date));
-            }
+            this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
         }
         if (this.checkboxInvert.isSelected()) {
             initModelGradeINVERTED();
@@ -465,7 +453,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
 
     private void filterMergeSearchStudent() {
-        Predicate<Student> filtered = null;// asa compunem predicatele
+        Predicate<Student> filtered = null;//TODO: asa compunem predicatele
 
         Iterable<Student> students = service.getAllStudent();
         List<Student> studentList = StreamSupport.stream(students.spliterator(), false)
@@ -738,16 +726,6 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     @Override
     public void updateGrade(GradeChangeEvent gradeChangeEvent) {
         initModelGrade();
-
-        histoChartRaport1();
-        histoChartRaport2();
-        histoChartRaport3();
-        histoChartRaport4();
-
-        pieChartRaport1();
-        pieChartRaport2();
-        pieChartRaport3();
-        pieChartRaport4();
     }
 
 
@@ -818,9 +796,9 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
                         try{
                             Nota rez = this.service.addNota(toBeAdded);
                             if (rez == null) {
-                                //List<Student> toBeEmailed = new ArrayList<>();
-                                //toBeEmailed.add(s);
-                                //SendEmailUtility.sendEmail(toBeEmailed, "V-A FOST ADAUGATA O NOUA NOTA",toBeAdded.toString());
+                                List<Student> toBeEmailed = new ArrayList<>();
+                                toBeEmailed.add(s);
+                                SendEmailUtility.sendEmail(toBeEmailed, "V-A FOST ADAUGATA O NOUA NOTA",toBeAdded.toString());
                                 CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost adaugata!");
                                 handleclearFieldsNota();
 
@@ -854,10 +832,10 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
                 }
                 else{
                     CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost stearsa cu succes!");
-                    //List<Student> toBeEmailed = new ArrayList<>();
-                    //Student found = this.service.findByIdStudent(n.getId().split(":")[0]);
-                    //toBeEmailed.add(found);
-                    //SendEmailUtility.sendEmail(toBeEmailed, "O NOTA V-A FOST STEARSA", n.toString());
+                    List<Student> toBeEmailed = new ArrayList<>();
+                    Student found = this.service.findByIdStudent(n.getId().split(":")[0]);
+                    toBeEmailed.add(found);
+                    SendEmailUtility.sendEmail(toBeEmailed, "O NOTA V-A FOST STEARSA", n.toString());
                     handleclearFieldsNota();
                 }
             }
@@ -872,22 +850,22 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
             if (n == null) {
                 CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut gasit nota!");
             } else {
-                Student s = this.service.findByIdStudent(n.getId().split(":")[0]);// RECOMPUTE GRADE CONSIDERING MOTIVATIONS
+                Student s = this.service.findByIdStudent(n.getId().split(":")[0]);//TODO RECOMPUTE GRADE CONSIDERING MOTIVATIONS
                 Tema t = this.service.findByIdTema(n.getId().split(":")[1]);
                 int max = this.computeMaxGrade(s, t, this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER));
 
                 if (Integer.parseInt(this.textNotaValoare.getText()) > max) {
                     CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Nota nu poate depasi " + max + " !");
-                } else if (!Constants.compareDates(LocalDate.now(), this.dateNotaData.getValue())) {
+                } else if (Constants.compareDates(this.dateNotaData.getValue(), LocalDate.now())) {
                     CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Data nu poate fi din viitor!");
                 } else {
                     Nota replace = new Nota(n.getId(), Integer.parseInt(this.textNotaValoare.getText()), n.getProfesor(), this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER), this.textNotaFeedback.getText());
                     try{
                         Nota rez = this.service.updateNota(replace);
-                        if (rez != null) {
-                            //List<Student> toBeEmailed = new ArrayList<>();
-                            //toBeEmailed.add(s);
-                            //SendEmailUtility.sendEmail(toBeEmailed, "V-A FOST MODIFICATA O NOTA",replace.toString());
+                        if (rez == null) {
+                            List<Student> toBeEmailed = new ArrayList<>();
+                            toBeEmailed.add(s);
+                            SendEmailUtility.sendEmail(toBeEmailed, "V-A FOST MODIFICATA O NOTA",replace.toString());
                             CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost modificata!");
                             handleclearFieldsNota();
                         } else {
@@ -1167,3 +1145,29 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     }
 }
 
+
+
+        /*try {
+            List<Object> lines = this.service.raport2();
+            String title = "Cea mai grea tema";
+            String pdfName;
+            if(this.textFileName2.getText().isEmpty()){
+                pdfName = this.textFileName2.getPromptText();
+            }
+            else{
+                pdfName = this.textFileName2.getText();
+            }
+            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+        } catch (IOException e) {
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
+            //e.printStackTrace();
+        }*/
+
+        /*final DirectoryChooser directoryChooser =
+                new DirectoryChooser();
+        final File selectedDirectory =
+                directoryChooser.showDialog(dialogStage);
+        if (selectedDirectory != null) {
+            this.textSavePath.setText(selectedDirectory.getAbsolutePath());
+        }*/
