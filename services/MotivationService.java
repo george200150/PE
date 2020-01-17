@@ -1,21 +1,21 @@
 package services;
 
 import domain.Motivation;
-import repositories.AbstracBaseRepository;
+import repositories.CrudRepository;
 import utils.events.ChangeEventType;
 import utils.events.MotivationChangeEvent;
-import utils.observer.Observable;
-import utils.observer.Observer;
+import utils.observer.MotivationObserver;
+import utils.observer.ObservableMotivation;
 import validators.ValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MotivationService implements Service<String, Motivation>, Observable<MotivationChangeEvent> {
-    private AbstracBaseRepository<String, Motivation> motivationRepository = null;
-    private List<Observer<MotivationChangeEvent>> observers = new ArrayList<>();
+public class MotivationService implements Service<String, Motivation>, ObservableMotivation {
+    private CrudRepository<String, Motivation> motivationRepository = null;
+    private List<MotivationObserver> observers = new ArrayList<>();
 
-    public MotivationService(AbstracBaseRepository<String, Motivation> motivationRepository) {
+    public MotivationService(CrudRepository<String, Motivation> motivationRepository) {
         this.motivationRepository = motivationRepository;
     }
 
@@ -33,7 +33,7 @@ public class MotivationService implements Service<String, Motivation>, Observabl
     public Motivation add(Motivation entity) throws ValidationException {
         Motivation r = motivationRepository.save(entity);
         if(r == null) {
-            notifyObservers(new MotivationChangeEvent(ChangeEventType.ADD, entity));
+            notifyObserversMotivation(new MotivationChangeEvent(ChangeEventType.ADD, entity));
         }
         return r;
     }
@@ -42,7 +42,7 @@ public class MotivationService implements Service<String, Motivation>, Observabl
     public Motivation removeById(String s) {
         Motivation r = motivationRepository.delete(s);
         if(r != null) {
-            notifyObservers(new MotivationChangeEvent(ChangeEventType.DELETE, r));
+            notifyObserversMotivation(new MotivationChangeEvent(ChangeEventType.DELETE, r));
         }
         return r;
     }
@@ -52,23 +52,23 @@ public class MotivationService implements Service<String, Motivation>, Observabl
         Motivation oldStudent = motivationRepository.findOne(newEntity.getId());
         Motivation res = motivationRepository.update(newEntity);
         if(res == null) {
-            notifyObservers(new MotivationChangeEvent(ChangeEventType.UPDATE, newEntity, oldStudent));
+            notifyObserversMotivation(new MotivationChangeEvent(ChangeEventType.UPDATE, newEntity, oldStudent));
         }
         return res;
     }
 
     @Override
-    public void addObserver(Observer<MotivationChangeEvent> e) {
+    public void addObserverMotivation(MotivationObserver e) {
         observers.add(e);
     }
 
     @Override
-    public void removeObserver(Observer<MotivationChangeEvent> e) {
+    public void removeObserverMotivation(MotivationObserver e) {
         observers.remove(e);
     }
 
     @Override
-    public void notifyObservers(MotivationChangeEvent t) {
-        observers.forEach(x->x.update(t));
+    public void notifyObserversMotivation(MotivationChangeEvent t) {
+        observers.forEach(x->x.updateMotivation(t));
     }
 }

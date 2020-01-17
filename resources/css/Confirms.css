@@ -1,0 +1,10 @@
+.button {
+    -fx-text-fill: white;
+    /*-fx-font-family: "Helvetica";
+    -fx-font-weight: bold;*/
+    -fx-background-color: linear-gradient(#2c87e1, #003058);
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+}
+.label {
+    -fx-effect: dropshadow( gaussian , rgba(25, 0, 214, 0.5), 0,0,0,1 );
+}

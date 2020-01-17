@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: linear-gradient(#dfd0ff, #8f99cb);" stylesheets="@../css/General.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.StudentAccountController">
+   <children>
+      <Label layoutX="29.0" prefHeight="58.0" prefWidth="170.0" text="STUDENT" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+      <TabPane layoutX="45.0" layoutY="139.0" prefHeight="1080.0" prefWidth="1920.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <tabs>
+          <Tab text="Note">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="tableViewStudentAccountGrades" layoutX="40.0" layoutY="56.0" prefHeight="868.0" prefWidth="1920.0" AnchorPane.bottomAnchor="77.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="56.0">
+                          <columns>
+                            <TableColumn fx:id="studentViewGradesTaskColumn" prefWidth="340.0" text="Tema" />
+                            <TableColumn fx:id="studentViewGradesDescriptionColumn" prefWidth="495.0" text="Descriere" />
+                              <TableColumn fx:id="studentViewGradesValueColumn" prefWidth="109.0" text="Valoare" />
+                              <TableColumn fx:id="studentViewGradesFeedbackColumn" prefWidth="787.0" text="Feedback" />
+                              <TableColumn fx:id="studentViewGradesProfessorColumn" prefWidth="188.0" text="Profesor" />
+                          </columns>
+                        </TableView>
+                        <Label layoutX="23.0" layoutY="14.0" prefHeight="30.0" prefWidth="392.0" text="ACESTEA SUNT NOTELE DUMNEAVOASTRA:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Button layoutX="899.0" layoutY="952.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" prefHeight="25.0" prefWidth="122.0" text="Inapoi la LogIn!" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="899.0" AnchorPane.rightAnchor="899.0" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Resetare Parola">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Button layoutX="846.0" layoutY="270.0" mnemonicParsing="false" onAction="#handleResetPassword" prefHeight="25.0" prefWidth="110.0" text="Resetare" />
+                        <Button layoutX="965.0" layoutY="270.0" mnemonicParsing="false" onAction="#handleBackToLogInChoice" prefHeight="25.0" prefWidth="110.0" text="Inapoi la LogIn!" />
+                        <PasswordField fx:id="newPasswordField" layoutX="926.0" layoutY="209.0" />
+                        <PasswordField fx:id="oldPasswordField" layoutX="926.0" layoutY="166.0" />
+                        <Label layoutX="846.0" layoutY="170.0" text="Fosta parola" />
+                        <Label layoutX="846.0" layoutY="213.0" text="Noua parola" />
+                        <Label layoutX="30.0" layoutY="14.0" text="RESETATI PAROLA DUMNEAVOASTRA:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+      <Label fx:id="labelStudent" layoutX="210.0" text="NULL" AnchorPane.leftAnchor="250.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

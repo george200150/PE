@@ -6,6 +6,8 @@ public class Interval {
     private LocalDate start;
     private LocalDate end;
 
+    private String stringValue;
+
     public Interval(LocalDate start, LocalDate end) {
         this.start = start;
         this.end = end;
@@ -25,5 +27,10 @@ public class Interval {
 
     public void setEnd(LocalDate end) {
         this.end = end;
+    }
+
+    @Override
+    public String toString() {
+        return this.start.toString() + " - " + this.end.toString();
     }
 }
