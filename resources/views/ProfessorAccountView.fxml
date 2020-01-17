@@ -177,12 +177,12 @@
                         <TableView fx:id="tableNota" layoutX="15.0" layoutY="153.0" onMouseClicked="#handleSelectionChanged" prefHeight="801.0" prefWidth="960.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
                           <columns>
                               <TableColumn fx:id="columnNotaId" prefWidth="75.0" text="ID" />
-                              <TableColumn fx:id="columnNotaStudent" prefWidth="169.0" text="Student" />
-                              <TableColumn fx:id="columnNotaTema" prefWidth="155.0" text="Tema" />
-                            <TableColumn fx:id="columnNotaData" prefWidth="95.0" text="Data" />
-                              <TableColumn fx:id="columnNotaProfesor" prefWidth="138.0" text="Profesor" />
-                              <TableColumn fx:id="columnNotaValoare" prefWidth="60.0" text="Valoare" />
-                              <TableColumn fx:id="columnNotaFeedback" prefWidth="267.0" text="Feedback" />
+                              <TableColumn fx:id="columnNotaStudent" prefWidth="183.0" text="Student" />
+                              <TableColumn fx:id="columnNotaTema" prefWidth="165.0" text="Tema" />
+                            <TableColumn fx:id="columnNotaData" prefWidth="102.0" text="Data" />
+                              <TableColumn fx:id="columnNotaProfesor" prefWidth="161.0" text="Profesor" />
+                              <TableColumn fx:id="columnNotaValoare" prefWidth="65.0" text="Valoare" />
+                              <TableColumn fx:id="columnNotaFeedback" prefWidth="208.0" text="Feedback" />
                           </columns>
                         </TableView>
                         <CheckBox fx:id="checkboxInvert" layoutX="1132.0" layoutY="91.0" mnemonicParsing="false" onAction="#handleToggleINVERT" text="Schimbati modul de editare" />
