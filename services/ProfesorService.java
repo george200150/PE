@@ -1,7 +1,7 @@
 package services;
 
 import domain.Profesor;
-import repositories.AbstracBaseRepository;
+import repositories.CrudRepository;
 import utils.events.ChangeEventType;
 import utils.events.ProfesorChangeEvent;
 import utils.observer.Observable;
@@ -13,10 +13,10 @@ import java.util.List;
 
 
 public class ProfesorService implements Service<String, Profesor>, Observable<ProfesorChangeEvent> {
-    private AbstracBaseRepository<String, Profesor> profesorRepository = null;
+    private CrudRepository<String, Profesor> profesorRepository = null;
     private List<Observer<ProfesorChangeEvent>> observers = new ArrayList<>();
 
-    public ProfesorService(AbstracBaseRepository<String, Profesor> profesorRepository) {
+    public ProfesorService(CrudRepository<String, Profesor> profesorRepository) {
         this.profesorRepository = profesorRepository;
     }
 

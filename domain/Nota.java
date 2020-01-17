@@ -70,30 +70,6 @@ public class Nota extends Entity<String> {
 
     @Override
     public String toString() {
-        return "Nota{" +
-                "id='" + id + '\'' +
-                ", data='" + data + '\'' +
-                ", profesor='" + profesor + '\'' +
-                ", valoare=" + valoare +
-                '}';
+        return "In data " + data + ", profesorul " + profesor + " v-a acordat nota " + valoare + " cu observatia urmatoare:\n" + feedback;
     }
 }
-
-/*
-autocomplete combo box - pentru studenti
-combo box in care sa avem pusa tema curenta
-(dupa ce am selectat studentul, vor disparea acele teme la care studentul are nota)
-(dupa ce am selectat data, vor disparea acele teme la care s-a depasit termenul maxim de predare (2 sapt in plus) )
-TODO: cand schimbam tema, vom actualiza si daca exista penalitati sau nu la nota
-TODO: apare un mesaj cu ROSU care spune ca depunctam (si apare o bifa - checkbox)
-TODO: in acest caz, va trebui sa bifam un checkbox
-vor fi doua checkbox-uri pentru diferite intarzieri: cand profesorul intarzie si cand studentul intarzie
-(daca nu trece nici proful la timp si nici studentul nu preda doua saptamani si are si scutire o saptamana... si ni se prind urechile...)
-
-
---alta varianta:
-avem un calendar - selectam data cand a predat studentul tema
-(((avem al doilea calendar - selectam de cand pana cand a lipsit motivat studentul...)))
-avem niste checkbox-uri cu saptamanile de la termenul de start al temei pana in saptamana curenta, si sa selectam saptamanile de motivare
-
- */

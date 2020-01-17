@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: linear-gradient(#dfd0ff, #8f99cb);" stylesheets="@../css/General.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.ProfessorAccountController">
+   <children>
+      <TabPane layoutX="60.0" layoutY="56.0" prefHeight="1024.0" prefWidth="1920.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <tabs>
+          <Tab text="Studenti">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="49.0" layoutY="26.0" text="Vizualizati studentii existenti:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <TableView fx:id="tableStudent" layoutX="91.0" layoutY="58.0" prefHeight="801.0" prefWidth="1083.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
+                          <columns>
+                            <TableColumn fx:id="columnStudentNume" prefWidth="291.0" text="Nume" />
+                              <TableColumn fx:id="columnStudentPrenume" prefWidth="298.0" text="Prenume" />
+                              <TableColumn fx:id="columnStudentGrupa" prefWidth="126.0" text="Grupa" />
+                              <TableColumn fx:id="columnStudentEmail" prefWidth="244.0" text="Email" />
+                          </columns>
+                        </TableView>
+                        <ButtonBar layoutX="1039.0" layoutY="224.0" prefHeight="40.0" prefWidth="243.0">
+                          <buttons>
+                              <Button mnemonicParsing="false" onAction="#handleClearFieldsStudent" text="Resetare" />
+                              <Button mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                          </buttons>
+                        </ButtonBar>
+                        <GridPane layoutX="960.0" layoutY="50.0" prefHeight="174.0" prefWidth="322.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TextField fx:id="textStudentNume" GridPane.columnIndex="1" />
+                              <TextField fx:id="textStudentPrenume" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="textStudentGrupa" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="textStudentEmail" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="150.0" text="Nume" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="150.0" text="Prenume" GridPane.rowIndex="1" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="150.0" text="Grupa" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="150.0" text="Email" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                        <TableView fx:id="tableMotivariStudent" layoutX="1404.0" layoutY="50.0" prefHeight="200.0" prefWidth="520.0">
+                          <columns>
+                            <TableColumn fx:id="columnMotivariStudent" prefWidth="279.0" text="student" />
+                            <TableColumn fx:id="columnMotivariInterval" prefWidth="240.0" text="interval" />
+                          </columns>
+                        </TableView>
+                        <GridPane layoutX="1446.0" layoutY="347.0" prefHeight="90.0" prefWidth="318.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label alignment="CENTER_RIGHT" prefWidth="150.0" text="inceput" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="150.0" text="sfarsit" GridPane.rowIndex="1" />
+                              <DatePicker fx:id="datePickerMotivareInceput" GridPane.columnIndex="1" />
+                              <DatePicker fx:id="datePickerMotivareSfarsit" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           </children>
+                        </GridPane>
+                        <ButtonBar layoutX="1564.0" layoutY="437.0" prefHeight="40.0" prefWidth="200.0">
+                          <buttons>
+                            <Button mnemonicParsing="false" onAction="#handleAdaugaMotivare" text="Adauga" />
+                              <Button mnemonicParsing="false" onAction="#handleStergeMotivare" text="Sterge" />
+                          </buttons>
+                        </ButtonBar>
+                        <Label layoutX="1511.0" layoutY="263.0" text="Adaugati motivari studentilor:">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="1508.0" layoutY="293.0" text="pentru a adauga motivari, selectati din tabel un">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="1509.0" layoutY="320.0" text="student, apoi introduceti intervalul de motivare">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Label>
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Teme">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="56.0" layoutY="24.0" text="Vizualizati temele existente:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <TableView fx:id="tableTema" layoutX="101.0" layoutY="52.0" prefHeight="801.0" prefWidth="1166.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
+                          <columns>
+                            <TableColumn fx:id="tableTemaNume" prefWidth="223.0" text="Nume" />
+                              <TableColumn fx:id="tableTemaDescriere" prefWidth="364.0" text="Descriere" />
+                              <TableColumn fx:id="tableTemaInceput" prefWidth="169.0" text="Inceput" />
+                              <TableColumn fx:id="tableTemaSfarsit" prefWidth="203.0" text="Sfarsit" />
+                          </columns>
+                        </TableView>
+                        <GridPane layoutX="960.0" layoutY="50.0" prefHeight="170.0" prefWidth="312.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TextField fx:id="textTemaNume" GridPane.columnIndex="1" />
+                              <TextField fx:id="textTemaDescriere" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="dateTemaInceput" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="dateTemaSfarsit" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="140.0" text="Nume" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="140.0" text="Descriere" GridPane.rowIndex="1" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="140.0" text="Inceput" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="140.0" text="Sfarsit" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                        <ButtonBar layoutX="1035.0" layoutY="220.0" prefHeight="40.0" prefWidth="237.0">
+                          <buttons>
+                              <Button mnemonicParsing="false" onAction="#handleClearFieldsTema" text="Resetare" />
+                              <Button mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                          </buttons>
+                        </ButtonBar>
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+            <Tab text="Note">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="27.0" layoutY="14.0" text="Vizualizati si gestionati notele studentilor:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <TableView fx:id="tableNota" layoutX="15.0" layoutY="153.0" onMouseClicked="#handleSelectionChanged" prefHeight="801.0" prefWidth="960.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="960.0" AnchorPane.topAnchor="50.0">
+                          <columns>
+                              <TableColumn fx:id="columnNotaId" prefWidth="75.0" text="ID" />
+                              <TableColumn fx:id="columnNotaStudent" prefWidth="183.0" text="Student" />
+                              <TableColumn fx:id="columnNotaTema" prefWidth="165.0" text="Tema" />
+                            <TableColumn fx:id="columnNotaData" prefWidth="102.0" text="Data" />
+                              <TableColumn fx:id="columnNotaProfesor" prefWidth="161.0" text="Profesor" />
+                              <TableColumn fx:id="columnNotaValoare" prefWidth="65.0" text="Valoare" />
+                              <TableColumn fx:id="columnNotaFeedback" prefWidth="208.0" text="Feedback" />
+                          </columns>
+                        </TableView>
+                        <CheckBox fx:id="checkboxInvert" layoutX="1132.0" layoutY="91.0" mnemonicParsing="false" onAction="#handleToggleINVERT" text="Schimbati modul de editare" />
+                        <Label layoutX="985.0" layoutY="50.0" text="Info: modul de editare se refera la ce drepturi de actiune aveti asupra datelor din tabela" />
+                        <Label layoutX="1003.0" layoutY="67.0" text="pentru a sterge sau modifica lasati casuta debifata; pentru a adauga bifati casuta" />
+                        <GridPane layoutX="985.0" layoutY="125.0" prefHeight="350.0" prefWidth="420.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TextField fx:id="textNotaId" GridPane.columnIndex="1" />
+                              <TextField fx:id="textNotaStudent" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="textNotaTema" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <DatePicker fx:id="dateNotaData" prefHeight="25.0" prefWidth="266.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <TextField fx:id="textNotaProf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <TextField fx:id="textNotaValoare" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <TextField fx:id="textNotaFeedback" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="Feedback" GridPane.rowIndex="6" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="Valoare" GridPane.rowIndex="5" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="Profesor" GridPane.rowIndex="4" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="Data" GridPane.rowIndex="3" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="Tema" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="Student" GridPane.rowIndex="1" />
+                              <Label alignment="CENTER_RIGHT" prefWidth="200.0" text="ID" />
+                           </children>
+                        </GridPane>
+                        <ButtonBar layoutX="1140.0" layoutY="481.0" prefHeight="40.0" prefWidth="200.0">
+                          <buttons>
+                              <Button mnemonicParsing="false" onAction="#handleAddNota" text="Adauga" />
+                              <Button mnemonicParsing="false" onAction="#handleDeleteNota" text="Sterge" />
+                              <Button mnemonicParsing="false" onAction="#handleUpdateNota" text="Modifica" />
+                          </buttons>
+                        </ButtonBar>
+                        <ButtonBar layoutX="1162.0" layoutY="532.0" prefHeight="40.0" prefWidth="243.0">
+                          <buttons>
+                              <Button mnemonicParsing="false" onAction="#handleClearFieldsNota" text="Reseteaza" />
+                              <Button mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                          </buttons>
+                        </ButtonBar>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="Rapoarte">
+              <content>
+                <AnchorPane fx:id="anchor" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="35.0" layoutY="14.0" text="Generati si salvati in format PDF rapoarte despre performanta studentilor:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="373.0" layoutY="102.0" text="Nota la laborator pentru fiecare student (media ponderata a notelor de latemele de laborator; pondere tema=nr de saptamani alocate temei)." />
+                        <Label layoutX="373.0" layoutY="149.0" text=" Cea mai grea tema: media notelor la tema respectiva este cea mai mica" />
+                        <Label layoutX="373.0" layoutY="197.0" text="Studentii care pot intra in examen (media mai mare sau egala cu 4)" />
+                        <Label layoutX="373.0" layoutY="240.0" text="Studentii care au predat la timp toate temele" />
+                        <PieChart fx:id="classesPieChart" layoutX="1135.0" layoutY="15.0" prefHeight="311.0" prefWidth="393.0" title="impartirea studentilor dumneavoastra pe grupe" />
+                        <GridPane layoutX="14.0" layoutY="346.0" prefHeight="512.0" prefWidth="1888.0">
+                          <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <PieChart fx:id="itemsPieChart" prefHeight="225.0" prefWidth="281.0" />
+                              <PieChart fx:id="itemsPieChart2" prefHeight="232.0" prefWidth="292.0" GridPane.columnIndex="1" />
+                              <PieChart fx:id="itemsPieChart3" prefHeight="230.0" prefWidth="307.0" GridPane.columnIndex="2" />
+                              <PieChart fx:id="itemsPieChart4" prefHeight="196.0" prefWidth="245.0" GridPane.columnIndex="3" />
+                              <BarChart fx:id="histo2" prefHeight="117.0" prefWidth="162.0" GridPane.columnIndex="1">
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="histo3" prefHeight="117.0" prefWidth="162.0" GridPane.columnIndex="2">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="histo4" prefHeight="117.0" prefWidth="162.0" GridPane.columnIndex="3">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="histo1" prefHeight="214.0" prefWidth="418.0">
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                           </children>
+                        </GridPane>
+                        <GridPane layoutX="227.0" layoutY="87.0" prefHeight="186.0" prefWidth="134.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#handleExport1" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 1" />
+                              <Button mnemonicParsing="false" onAction="#handleExport2" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 2" GridPane.rowIndex="1" />
+                              <Button mnemonicParsing="false" onAction="#handleExport3" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 3" GridPane.rowIndex="2" />
+                              <Button mnemonicParsing="false" onAction="#handleExport4" prefHeight="25.0" prefWidth="130.0" text="Generare Raport 4" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                        <ToggleButton fx:id="toggleCharts" layoutX="89.0" layoutY="168.0" mnemonicParsing="false" onAction="#handleChangeRadio" text="   PIE   " />
+                        <Label layoutX="70.0" layoutY="141.0" text="TIPUL DE GRAFIC" />
+                        <Button layoutX="227.0" layoutY="287.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" prefHeight="25.0" prefWidth="130.0" text="Inapoi la LogIn" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="Resetare Parola">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="58.0" layoutY="14.0" text="Resetati parola dumneavoastra:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="836.0" layoutY="124.0" text="Parola veche:" />
+                        <Label layoutX="838.0" layoutY="168.0" text="Parola noua:" />
+                        <Button layoutX="861.0" layoutY="223.0" mnemonicParsing="false" onAction="#handleResetPassword" text="Reseteaza" />
+                        <Button layoutX="965.0" layoutY="223.0" mnemonicParsing="false" onAction="#handleBackToLoginChoice" text="Inapoi la LogIn" />
+                        <PasswordField fx:id="textOldPassword" layoutX="936.0" layoutY="120.0" />
+                        <PasswordField fx:id="textNewPassword" layoutX="936.0" layoutY="164.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <Label layoutX="25.0" text="PROFESOR" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+      <Label fx:id="labelProfesor" layoutX="256.0" text="NULL" AnchorPane.leftAnchor="250.0" AnchorPane.topAnchor="0.0">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

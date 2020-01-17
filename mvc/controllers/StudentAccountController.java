@@ -15,7 +15,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import mvc.StudentAlert;
+import mvc.CustomAlert;
+import mvc.controllers.login.LoginChoiceController;
 import services.MasterService;
 import utils.events.GradeChangeEvent;
 import utils.observer.Observer;
@@ -139,10 +140,10 @@ public class StudentAccountController implements Observer<GradeChangeEvent> {
         String email = this.loggedInStudent.getEmail();//USERNAME IS THE EMAIL!!!
         boolean state = this.service.changeStudentPassword(email, oldPsswd, newPsswd);
         if(state){
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"Resetare","parola a fost actualizata!");
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION,"Resetare","parola a fost actualizata!");
         }
         else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Log In","parola nu a putut fi actualizata!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR,"Log In","parola nu a putut fi actualizata!");
         }
     }
 }

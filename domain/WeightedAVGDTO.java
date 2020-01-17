@@ -1,9 +1,12 @@
 package domain;
 
+import java.text.DecimalFormat;
+
 public class WeightedAVGDTO {
     private Student s;
     private String studentString;
     private double avg;
+    private DecimalFormat df = new DecimalFormat("#.00");
 
     public WeightedAVGDTO(Student s, Double avg) {
         this.s = s;
@@ -33,5 +36,11 @@ public class WeightedAVGDTO {
 
     public void setAvg(double avg) {
         this.avg = avg;
+    }
+
+    @Override
+    public String toString() {
+
+        return studentString + " : " + df.format(avg);
     }
 }

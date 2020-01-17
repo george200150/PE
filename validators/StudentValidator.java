@@ -12,18 +12,17 @@ public class StudentValidator extends AbstractValidator<Student> {
     public void validate(Student entity) throws ValidationException {
         String exception = "";
         if(!entity.getEmail().matches("[a-zA-Z0-9._]+@[a-z.]+.[a-z]+")){
-            exception += "email adress is not valid\n";
+            exception += "adresa de email nu este valida\n";
         }
         if(entity.getNume().equals("")){
-            exception += "surname cannot be null\n";
+            exception += "prenumele nu poate fi gol\n";
         }
         if(entity.getPrenume().equals("")){
-            exception += "name cannot be null\n";
+            exception += "numele nu poate fi gol\n";
         }
         if(entity.getGrupa() < 100 || entity.getGrupa() > 999){
-            exception += "group must be a 3 digit positive number\n";
+            exception += "grupa trebuie sa fie un numar natural de 3 cifre\n";
         }
-        //we should later check if the lab professor exists in the app...
 
         if(exception.length() > 0)
             throw new ValidationException(exception);
