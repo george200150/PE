@@ -6,13 +6,6 @@ import utils.events.*;
 import utils.observer.*;
 import validators.ValidationException;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -268,13 +261,6 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
 
 
 
-
-
-
-
-
-
-
     public Student findByIdStudent(String s) {
         return studentService.findById(s);
     }
@@ -375,41 +361,13 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
 
 
 
-    private void writeToFile(Nota nota, String feedback){
-        String[] ids = nota.getId().split(":");
-        Student student = this.studentService.findById(ids[0]);
-        Tema tema = this.temaService.findById(ids[1]);
-
-
-        Path path = Paths.get("files/" + student.getNume() + "_" + student.getPrenume() + ".txt");
-
-
-        String one = "TEMA: " + tema.getNume();
-        String two = "NOTA: " + nota.getValoare();
-        String three = "PREDATA IN SAPTAMANA: " + nota.getData();
-        String four = "DEADLINE: " + tema.getDeadlineWeek();
-        String five = "FEEDBACK: " + feedback;
-
-        String all = one + "\n" + two + "\n" + three + "\n" + four + ";\n" + five;
-        List<String> lines = Arrays.asList(all);
-
-        try {
-            Files.write(path, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            e.printStackTrace();//TODO: o sa cream fisierul doar daca nu exista (...?cum?...)
-        }
-    }
-
-
     private NotaDTO getDTOFromNota(Nota n){
         Student s = findByIdStudent(n.getId().split(":")[0]);
         Tema t = findByIdTema(n.getId().split(":")[1]);
         return new NotaDTO(n,t,s);
     }
-    //Nota la laborator pentru fiecare student (media ponderata a notelor de la
-    //temele de laborator;
-    // pondere tema = nr de saptamani alocate temei)
-    public List<Object> raport1(Profesor profesor){
+
+    public List<WeightedAVGDTO> raport1Student(Profesor profesor){
         Iterable<Nota> grades = getAllNota();
         List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
                 .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered to have only logged in teacher's grades considered
@@ -424,6 +382,39 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
 
         Map<Student, Double> mediileStudentilor = dtoMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(sub -> (sub.getValoare() * (double) (sub.getT().getDuration())) / 14).sum()));
+
+        return mediileStudentilor.entrySet().stream()
+                .map(x -> new WeightedAVGDTO(x.getKey(), x.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    //Nota la laborator pentru fiecare student (media ponderata a notelor de la
+    //temele de laborator;
+    // pondere tema = nr de saptamani alocate temei)
+    private Double func(NotaDTO sub){
+        int value = sub.getValoare();
+        int duration = sub.getT().getDuration();
+        double val = (value * (double) (duration)) / 14;
+        return val;
+    }
+
+    public List<Object> raport1(Profesor profesor){
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered to have only logged in teacher's grades considered
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        Map<Student, List<NotaDTO>> dtoMap = dtoList.stream()
+                .collect(Collectors.groupingBy(NotaDTO::getS));
+
+        //Map<Student, Double> mediileStudentilor = getMediiStudenti(profesor);
+        Map<Student, Double> mediileStudentilor = dtoMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(this::func).sum()));
+
 
         return mediileStudentilor.entrySet().stream()
                 .map(x -> new WeightedAVGDTO(x.getKey(), x.getValue()))
@@ -466,7 +457,7 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
         return StreamSupport
                 .stream(this.getAllStudent().spliterator(),false)
                 .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))//filtered by professor
-                .filter(x -> this.getMedieStudent(x) >= 4)
+                .filter(x -> this.getMedieStudent(x) >= 5)
                 .collect(Collectors.toList());
     }
 
@@ -475,9 +466,12 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
                 .stream(this.getAllNota().spliterator(),false)
                 .filter(x -> x.getId().split(":")[0].equals(student.getId()))//filtered by professor
                 .collect(Collectors.toList());
-        double nrNote = noteStudent.size();
-        double sum = noteStudent.stream().mapToInt(Nota::getValoare).sum();
-        return sum / nrNote;
+
+        List<NotaDTO> dtos = noteStudent.stream().map(this::getDTOFromNota).collect(Collectors.toList());
+
+
+        double media = dtos.stream().mapToDouble(this::func).sum();
+        return media;
     }
 
     public List<Object> raport4(Profesor profesor){
@@ -490,13 +484,108 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
                 .map(this::getDTOFromNota)
                 .collect(Collectors.toList());
 
-        return dtoList.stream()
-                .filter(x -> Constants.compareDates(x.getT().getDeadlineWeek(), x.getDataNota()))
+        List<Object> allBad = dtoList.stream()
+                .filter(x -> !Constants.compareDates(x.getT().getDeadlineWeek(), x.getDataNota()))
                 .map(NotaDTO::getS)
+                .distinct()
                 .collect(Collectors.toList());
+
+        List<Object> allAll = StreamSupport.stream(getAllStudent().spliterator(), false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))//filtered by professor
+                .collect(Collectors.toList());
+        allAll.removeAll(allBad);
+
+        return allAll;
     }
 
 
+    public Map<Student, Double> getMediiStudenti(Profesor profesor){
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered to have only logged in teacher's grades considered
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        Map<Student, List<NotaDTO>> dtoMap = dtoList.stream()
+                .collect(Collectors.groupingBy(NotaDTO::getS));
+
+        return dtoMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, pair -> pair.getValue().stream().mapToDouble(sub -> (sub.getValoare() * (double) (sub.getT().getDuration())) / 14).sum()));
+    }
+
+    public Map<Tema, Double> getTemeGrele(Profesor profesor) {
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered by professor
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        Map<Tema, List<NotaDTO>> dtoMap = dtoList.stream()
+                .collect(Collectors.groupingBy(NotaDTO::getT));
+
+        return dtoMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> (e.getValue().stream().mapToDouble(NotaDTO::getValoare).sum()) / (double) (e.getValue().size())));
+    }
+
+    public Map<String, Integer> getStudentiDupaStatusExamen(Profesor profesor){
+        List<Student> l = StreamSupport
+                .stream(this.getAllStudent().spliterator(), false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))//filtered by professor
+                .collect(Collectors.toList());
+
+
+        Map<String, Integer> freq = new HashMap<String, Integer>();
+
+        l.forEach(x -> {
+            if(this.getMedieStudent(x) >= 5)
+                freq.merge("promovat", 1, Integer::sum);
+            else
+                freq.merge("corigent", 1, Integer::sum);
+        });
+
+        return freq;
+    }
+
+    public Map<String, Integer> getStudentiPrompti(Profesor profesor){
+
+
+        Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered by professor
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtoList = gradeList.stream()
+                .map(this::getDTOFromNota)
+                .collect(Collectors.toList());
+
+        List<Student> allBad = dtoList.stream()//verificam ca macar un deadline sa nu fi fost respectat.
+                .filter(x -> !Constants.compareDates(x.getT().getDeadlineWeek(), x.getDataNota()))
+                .map(NotaDTO::getS)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Student> allGood = StreamSupport.stream(this.getAllStudent().spliterator(),false)
+                .filter(x -> x.getCadruDidacticIndrumatorLab().equals(profesor.toString()))
+                .collect(Collectors.toList());
+        allGood.removeAll(allBad);
+
+        Map<String, Integer> freq = new HashMap<String, Integer>();
+
+        allBad.forEach(x -> freq.merge("intarziat", 1, Integer::sum));
+        allGood.forEach(x -> freq.merge("la timp", 1, Integer::sum));
+
+        return freq;
+    }
+
+    private boolean isPunctual(List<NotaDTO> list){//checks if all tasks of one student are submitted on time/
+        return list.stream().noneMatch(x -> Constants.compareDates(x.getT().getDeadlineWeek(), x.getDataNota()));
+    }
 
     @Override
     public void addObserverGrade(GradeObserver e) {
@@ -559,3 +648,54 @@ public class MasterService implements ObservableGrade, ObservableTask, Observabl
     }
 }
 
+/*Iterable<Nota> grades = getAllNota();
+        List<Nota> gradeList = StreamSupport.stream(grades.spliterator(), false)
+                .filter(x -> x.getProfesor().equals(profesor.toString()))//filtered by professor
+                .collect(Collectors.toList());
+
+        List<NotaDTO> dtos = gradeList.stream().map(this::getDTOFromNota).collect(Collectors.toList());
+
+        Map<Student, List<NotaDTO>> gradesOfEachStudent = dtos.stream().collect(Collectors.groupingBy(NotaDTO::getS));
+
+        return gradesOfEachStudent.entrySet().stream()
+                .collect(Collectors.toMap(x -> isPunctual(x), Collectors.counting()));
+
+        /*List<Student> prompts = gradesOfEachStudent.entrySet().stream()
+                .filter(pair -> isPunctual(pair.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());*/
+
+
+/*
+    private void writeToFile(Nota nota, String feedback){
+        String[] ids = nota.getId().split(":");
+        Student student = this.studentService.findById(ids[0]);
+        Tema tema = this.temaService.findById(ids[1]);
+
+
+        Path path = Paths.get("files/" + student.getNume() + "_" + student.getPrenume() + ".txt");
+
+
+        String one = "TEMA: " + tema.getNume();
+        String two = "NOTA: " + nota.getValoare();
+        String three = "PREDATA IN SAPTAMANA: " + nota.getData();
+        String four = "DEADLINE: " + tema.getDeadlineWeek();
+        String five = "FEEDBACK: " + feedback;
+
+        String all = one + "\n" + two + "\n" + three + "\n" + four + ";\n" + five;
+        List<String> lines = Arrays.asList(all);
+
+        try {
+            Files.write(path, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();//TODO: o sa cream fisierul doar daca nu exista (...?cum?...)
+        }
+    }*/
+
+/*List<Nota> noteStudent = StreamSupport
+                .stream(this.getAllNota().spliterator(),false)
+                .filter(x -> x.getId().split(":")[0].equals(student.getId()))//filtered by professor
+                .collect(Collectors.toList());
+        double nrNote = noteStudent.size();
+        double sum = noteStudent.stream().mapToInt(Nota::getValoare).sum();
+        return sum / nrNote;*/

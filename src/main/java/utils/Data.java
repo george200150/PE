@@ -9,8 +9,10 @@ package utils;
 
 public class Data
 {
-    public static final String adminPass = "you really thought I would share my password with you?";
-    public static final String adminEmail = "proiect.extins@gmail.com";
+    //public static final String adminPass = "you really thought I would share my password with you?";
+    public static final String adminPass = "parola";
+    //public static final String adminEmail = "mail@gmail.com";
+    public static final String adminEmail = "mail@example.ro";
 }
 
 
