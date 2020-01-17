@@ -2,7 +2,7 @@ package services;
 
 
 import domain.Nota;
-import repositories.AbstracBaseRepository;
+import repositories.CrudRepository;
 import utils.events.GradeChangeEvent;
 import utils.observer.Observer;
 import validators.ValidationException;
@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NotaService implements Service<String, Nota>/*, Observable<GradeChangeEvent>*/ {
-    private AbstracBaseRepository<String, Nota> notaRepository = null;
+    private CrudRepository<String, Nota> notaRepository = null;
     private List<Observer<GradeChangeEvent>> observers=new ArrayList<>();
 
-    public NotaService(AbstracBaseRepository notaRepository) {
+    public NotaService(CrudRepository notaRepository) {
         this.notaRepository=notaRepository;
     }
 
@@ -41,18 +41,4 @@ public class NotaService implements Service<String, Nota>/*, Observable<GradeCha
         return notaRepository.update(entity);
     }
 
-    /*@Override
-    public void addObserver(Observer<GradeChangeEvent> e) {
-        observers.add(e);
-    }
-
-    @Override
-    public void removeObserver(Observer<GradeChangeEvent> e) {
-        observers.remove(e);
-    }
-
-    @Override
-    public void notifyObservers(GradeChangeEvent t) {
-        observers.forEach(x->x.update(t));
-    }*/
 }

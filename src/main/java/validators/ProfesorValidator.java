@@ -13,13 +13,13 @@ public class ProfesorValidator extends AbstractValidator<Profesor>  {
     public void validate(Profesor entity) throws ValidationException {
         String exception = "";
         if(!entity.getEmail().matches("[a-zA-Z0-9._]+@[a-z.]+.[a-z]+")){
-            exception += "email adress is not valid\n";
+            exception += "adresa de email nu este valida\n";
         }
         if(entity.getNume().equals("")){
-            exception += "surname cannot be null\n";
+            exception += "prenumele nu poate fi gol\n";
         }
         if(entity.getPrenume().equals("")){
-            exception += "name cannot be null\n";
+            exception += "numele nu poate fi gol\n";
         }
 
         if(exception.length() > 0)

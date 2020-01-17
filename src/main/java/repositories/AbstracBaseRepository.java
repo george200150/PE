@@ -31,7 +31,7 @@ public class AbstracBaseRepository<ID, E extends Entity<ID>> implements CrudRepo
     public E findOne(ID id) {
 
         if (id == null){
-            throw new IllegalArgumentException("ID CANNOT BE NULL");
+            throw new IllegalArgumentException("ID-ul NU POATE FI NULL");
         }
 
         for (Map.Entry<ID,E> pereche : treeMap.entrySet()) {
@@ -66,12 +66,12 @@ public class AbstracBaseRepository<ID, E extends Entity<ID>> implements CrudRepo
     public E save(E entity) throws ValidationException {
 
         if(entity == null){
-            throw new IllegalArgumentException("ID CANNOT BE NULL!");
+            throw new IllegalArgumentException("ID NU POATE FI NULL!");
         }
 
         abstractValidator.validate(entity);
         if (findOne(entity.getId()) != null){//TODO: 15.11.2019 - I had to refactor this, so that GUI will show message
-            throw new ValidationException("DUPLICATE FOUND!");
+            throw new ValidationException("DUPLICAT GASIT!");
         }
 
         E  oldValue = treeMap.get(entity.getId());
@@ -94,7 +94,7 @@ public class AbstracBaseRepository<ID, E extends Entity<ID>> implements CrudRepo
     public E delete(ID id) {
 
         if(id == null){
-            throw new IllegalArgumentException("Entity cannot be NULL!");
+            throw new IllegalArgumentException("ID-ul nu poate fi NULL!");
         }
 
         E delReturn = null;
@@ -122,7 +122,7 @@ public class AbstracBaseRepository<ID, E extends Entity<ID>> implements CrudRepo
     @Override
     public E update(E entity) {
         if (entity == null){
-            throw new IllegalArgumentException("Entity cannot be NULL!");
+            throw new IllegalArgumentException("Entitatea nu poate fi NULL!");
         }
 
         E ntt = findOne(entity.getId());

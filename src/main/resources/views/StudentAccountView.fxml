@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.StudentAccountController">
+<AnchorPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: linear-gradient(#dfd0ff, #8f99cb);" stylesheets="@../css/General.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.StudentAccountController">
    <children>
       <Label layoutX="29.0" prefHeight="58.0" prefWidth="170.0" text="STUDENT" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="0.0">
          <font>
@@ -25,11 +25,11 @@
                      <children>
                         <TableView fx:id="tableViewStudentAccountGrades" layoutX="40.0" layoutY="56.0" prefHeight="868.0" prefWidth="1920.0" AnchorPane.bottomAnchor="77.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="56.0">
                           <columns>
-                            <TableColumn fx:id="studentViewGradesTaskColumn" prefWidth="240.0" text="Tema" />
-                            <TableColumn fx:id="studentViewGradesDescriptionColumn" prefWidth="700.0" text="Descriere" />
-                              <TableColumn fx:id="studentViewGradesValueColumn" prefWidth="240.0" text="Valoare" />
-                              <TableColumn fx:id="studentViewGradesFeedbackColumn" prefWidth="195.0" text="Feedback" />
-                              <TableColumn fx:id="studentViewGradesProfessorColumn" prefWidth="195.0" text="Profesor" />
+                            <TableColumn fx:id="studentViewGradesTaskColumn" prefWidth="340.0" text="Tema" />
+                            <TableColumn fx:id="studentViewGradesDescriptionColumn" prefWidth="495.0" text="Descriere" />
+                              <TableColumn fx:id="studentViewGradesValueColumn" prefWidth="109.0" text="Valoare" />
+                              <TableColumn fx:id="studentViewGradesFeedbackColumn" prefWidth="787.0" text="Feedback" />
+                              <TableColumn fx:id="studentViewGradesProfessorColumn" prefWidth="188.0" text="Profesor" />
                           </columns>
                         </TableView>
                         <Label layoutX="23.0" layoutY="14.0" prefHeight="30.0" prefWidth="392.0" text="ACESTEA SUNT NOTELE DUMNEAVOASTRA:" AnchorPane.leftAnchor="25.0" AnchorPane.topAnchor="15.0">

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class Motivation extends Entity<String> {
     private Student student;
 
+    private String id;
     private String idStudent;
     private String numeStudent;
     private String prenumeStudent;
@@ -13,7 +14,25 @@ public class Motivation extends Entity<String> {
     private String cadruDidacticIndrumatorLabStudent;
 
     private Interval interval;
+    private String intervalToString;
+    private String studentToString;
 
+
+    public Motivation(String id, String idStudent, String nume, String prenume, int grupa, String email, String profesor, LocalDate start, LocalDate end) {
+        this.student = new Student(idStudent, nume, prenume, grupa, email, profesor);
+        this.interval = new Interval(start, end);
+
+        this.idStudent = idStudent;
+        this.numeStudent = nume;
+        this.prenumeStudent = prenume;
+        this.grupaStudent = grupa;
+        this.emailStudent = email;
+        this.cadruDidacticIndrumatorLabStudent = profesor;
+
+        this.intervalToString = interval.toString();
+        this.studentToString = student.toString();
+        this.id = this.idStudent + " " + this.interval.toString();
+    }
 
     public Motivation(Student student, LocalDate start, LocalDate end) {
         this.student = student;
@@ -25,6 +44,44 @@ public class Motivation extends Entity<String> {
         this.grupaStudent = student.getGrupa();
         this.emailStudent = student.getEmail();
         this.cadruDidacticIndrumatorLabStudent = student.getCadruDidacticIndrumatorLab();
+
+        this.intervalToString = interval.toString();
+        this.studentToString = student.toString();
+        this.id = this.idStudent + " " + this.interval.toString();
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getStudentToString() {
+        return studentToString;
+    }
+
+    public void setStudentToString(String studentToString) {
+        this.studentToString = studentToString;
+    }
+
+    public Interval getInterval() {
+        return interval;
+    }
+
+    public void setInterval(Interval interval) {
+        this.interval = interval;
+    }
+
+    public String getIntervalToString() {
+        return intervalToString;
+    }
+
+    public void setIntervalToString(String toString) {
+        this.intervalToString = toString;
     }
 
     public Student getStudent() {

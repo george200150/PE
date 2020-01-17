@@ -2,7 +2,7 @@ package services;
 
 
 import domain.Tema;
-import repositories.AbstracBaseRepository;
+import repositories.CrudRepository;
 import utils.events.ChangeEventType;
 import utils.events.TaskChangeEvent;
 import utils.observer.Observable;
@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TemaService implements Service<String, Tema>, Observable<TaskChangeEvent> {
-    private AbstracBaseRepository<String, Tema> temaRepository = null;
+    private CrudRepository<String, Tema> temaRepository = null;
     private List<Observer<TaskChangeEvent>> observers=new ArrayList<>();
 
-    public TemaService(AbstracBaseRepository temaRepository) {
+    public TemaService(CrudRepository temaRepository) {
         this.temaRepository = temaRepository;
     }
 

@@ -13,8 +13,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import mvc.StudentAlert;
+import mvc.CustomAlert;
 import mvc.controllers.confirmations.*;
+import mvc.controllers.login.LoginChoiceController;
 import services.MasterService;
 import utils.Constants;
 import utils.events.GradeChangeEvent;
@@ -25,6 +26,7 @@ import utils.observer.GradeObserver;
 import utils.observer.ProfesorObserver;
 import utils.observer.StudentObserver;
 import utils.observer.TaskObserver;
+import validators.ValidationException;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -254,24 +256,11 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         columnNoteFeedback.setCellValueFactory(new PropertyValueFactory<NotaDTO, String>("feedback"));
         tableNote.setItems(modelN);
 
-        /*textNotaProf.textProperty().addListener(((observableValue, s, t1) -> {
-            filterMergeSearchNota();
-        }));
-        textNotaValoare.textProperty().addListener(((observableValue, s, t1) -> {
-            filterMergeSearchNota();
-        }));
-
-        textNotaStudent.textProperty().addListener(((observableValue, s, t1) -> {
-            filterMergeSearchNota();
-        }));
-        textNotaTema.textProperty().addListener(((observableValue, s, t1) -> {
-            filterMergeSearchNota();
-        }));*/
     }
 
 
     private void filterMergeSearchStudent() {
-        Predicate<Student> filtered = null;//TODO: asa compunem predicatele
+        Predicate<Student> filtered = null;//asa compunem predicatele
 
         Iterable<Student> students = service.getAllStudent();
         List<Student> studentList = StreamSupport.stream(students.spliterator(), false)
@@ -457,13 +446,19 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         String email = this.textEmailStudent.getText();
         String prof = this.textProfStudent.getText();
         Student student = new Student(id, nume, prenume, grupa, email, prof);
-        Student rez = this.service.addStudent(student);
-        if (rez == null) {
-            this.service.addStudentPSSWD(student, this.textParolaStudent.getText());
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "studentul a fost adaugat cu succes!");
-        } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "studentul nu a putut fi adaugat!");
+        try{
+            Student rez = this.service.addStudent(student);
+            if (rez == null) {
+                this.service.addStudentPSSWD(student, this.textParolaStudent.getText());
+                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "studentul a fost adaugat cu succes!");
+            } else {
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "studentul nu a putut fi adaugat!");
+            }
         }
+        catch (ValidationException | IllegalArgumentException ex){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", ex.getMessage());
+        }
+
     }
 
     public void handleDeleteStudent(ActionEvent actionEvent) {
@@ -502,9 +497,9 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         if (rez != null) {
             this.service.deleteAllGradesOfStudent(toBeDeleted);
             this.service.deleteStudentPSSWD(toBeDeleted);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "stergere", "studentul a fost sters cu succes!");
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "stergere", "studentul a fost sters cu succes!");
         } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "stergere", "studentul nu a putut fi sters!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "stergere", "studentul nu a putut fi sters!");
         }
     }
 
@@ -546,13 +541,18 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     }
 
     public void updateStudentForReal(Student toBeUpdated) {
-        Student rez = this.service.updateStudent(toBeUpdated);
-        if (rez != null) {
-            this.service.updateAllGradesOfStudent(toBeUpdated);
-            this.service.updateStudentPSSWD(toBeUpdated, this.textParolaStudent.getText());
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "modificare", "studentul a fost modificat cu succes!");
-        } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "studentul nu a putut fi modificat!");
+        try {
+            Student rez = this.service.updateStudent(toBeUpdated);
+            if (rez != null) {
+                this.service.updateAllGradesOfStudent(toBeUpdated);
+                this.service.updateStudentPSSWD(toBeUpdated, this.textParolaStudent.getText());
+                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "modificare", "studentul a fost modificat cu succes!");
+            } else {
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "studentul nu a putut fi modificat!");
+            }
+        }
+        catch (ValidationException | IllegalArgumentException ex){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", ex.getMessage());
         }
     }
 
@@ -572,7 +572,7 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
             teme.remove(except);
         }
         LocalDate is2 = LocalDate.parse(tema.getStartWeek(), Constants.DATE_TIME_FORMATTER);
-        LocalDate ie2 = LocalDate.parse(tema.getStartWeek(), Constants.DATE_TIME_FORMATTER);
+        LocalDate ie2 = LocalDate.parse(tema.getDeadlineWeek(), Constants.DATE_TIME_FORMATTER);
 
         for (Tema t: teme) {
             LocalDate is1 = LocalDate.parse(t.getStartWeek(), Constants.DATE_TIME_FORMATTER);
@@ -592,15 +592,20 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         String end = this.dateSfarsitTema.getValue().format(Constants.DATE_TIME_FORMATTER);
         Tema tema = new Tema(id, nume, descriere, start, end);
         if(verifyTaskInterval(tema, null)){
-            Tema rez = this.service.addTema(tema);
-            if (rez == null) {
-                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "tema a fost adaugata cu succes!");
-            } else {
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema nu a putut fi adaugata!");
+            try{
+                Tema rez = this.service.addTema(tema);
+                if (rez == null) {
+                    CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "tema a fost adaugata cu succes!");
+                } else {
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema nu a putut fi adaugata!");
+                }
+            }
+            catch (ValidationException | IllegalArgumentException ex){
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", ex.getMessage());
             }
         }
         else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema introdusa se suprapune cu alta tema!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "tema introdusa se suprapune cu alta tema!");
         }
 
     }
@@ -640,18 +645,23 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
                 updateTemaForReal(toBeUpdated);
             }
         } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "tema introdusa se suprapune cu o alta tema!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "tema introdusa se suprapune cu o alta tema!");
         }
     }
 
 
     public void updateTemaForReal(Tema toBeUpdated) {
-        Tema rez = this.service.updateTema(toBeUpdated);
-        if (rez != null) {
-            this.service.updateAllGradesOfTema(toBeUpdated);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "modificare", "tema a fost modificata cu succes!");
-        } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "tema nu a putut fi modificata!");
+        try {
+            Tema rez = this.service.updateTema(toBeUpdated);
+            if (rez != null) {
+                this.service.updateAllGradesOfTema(toBeUpdated);
+                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "modificare", "tema a fost modificata cu succes!");
+            } else {
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "tema nu a putut fi modificata!");
+            }
+        }
+        catch (ValidationException | IllegalArgumentException ex){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", ex.getMessage());
         }
     }
 
@@ -693,10 +703,10 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         Tema rez = this.service.removeByIdTema(toBeDeleted.getId());
         if(rez != null){
             this.service.deleteAllGradesOfTema(toBeDeleted);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"stergere","tema a fost stearsa cu succes!");
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION,"stergere","tema a fost stearsa cu succes!");
         }
         else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","tema nu a putut fi stearsa!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","tema nu a putut fi stearsa!");
         }
     }
 
@@ -719,12 +729,17 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         String psswd = this.textParolaProf.getText();
 
         Profesor profesor = new Profesor(id,nume,prenume,email);
-        Profesor rez = this.service.addProfesor(profesor);
-        if (rez == null) {
-            this.service.addProfesorPSSWD(profesor, psswd);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "profesorul a fost adaugat cu succes!");
-        } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "profesorul nu a putut fi adaugat!");
+        try {
+            Profesor rez = this.service.addProfesor(profesor);
+            if (rez == null) {
+                this.service.addProfesorPSSWD(profesor, psswd);
+                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "adaugare", "profesorul a fost adaugat cu succes!");
+            } else {
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", "profesorul nu a putut fi adaugat!");
+            }
+        }
+        catch (ValidationException | IllegalArgumentException ex){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "adaugare", ex.getMessage());
         }
     }
 
@@ -762,10 +777,10 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
         if(rez != null){
             this.service.deleteAllStudentsANDGradesOfProfesor(toBeDeleted);
             this.service.deleteProfesorPSSWD(toBeDeleted);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"stergere","profesorul a fost sters cu succes!");
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION,"stergere","profesorul a fost sters cu succes!");
         }
         else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","profesorul nu a putut fi sters!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","profesorul nu a putut fi sters!");
         }
 
     }
@@ -803,13 +818,18 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     }
 
     public void updateProfesorForReal(Profesor toBeUpdated) {
-        Profesor rez = this.service.updateProfesor(toBeUpdated);
-        if (rez != null) {
-            this.service.updateAllGradesOfProfesor(toBeUpdated);
-            this.service.updateProfesorPSSWD(toBeUpdated, this.textParolaStudent.getText());
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "modificare", "profesorul a fost modificat cu succes!");
-        } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "profesorul nu a putut fi modificat!");
+        try {
+            Profesor rez = this.service.updateProfesor(toBeUpdated);
+            if (rez != null) {
+                this.service.updateAllGradesOfProfesor(toBeUpdated);
+                this.service.updateProfesorPSSWD(toBeUpdated, this.textParolaStudent.getText());
+                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "modificare", "profesorul a fost modificat cu succes!");
+            } else {
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", "profesorul nu a putut fi modificat!");
+            }
+        }
+        catch (ValidationException | IllegalArgumentException ex){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "modificare", ex.getMessage());
         }
     }
 
@@ -828,10 +848,10 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     public void handleModificaAdminParola(ActionEvent actionEvent) {
         boolean rez = this.service.changeAdminPassword(this.textAdminParola.getText());
         if(rez){
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION,"Resetare","parola a fost actualizata!");
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION,"Resetare","parola a fost actualizata!");
         }
         else{
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"Resetare","parola nu a putut fi actualizata!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR,"Resetare","parola nu a putut fi actualizata!");
         }
     }
 
@@ -859,14 +879,14 @@ public class AdminAccountController implements GradeObserver, TaskObserver, Stud
     public void handleDelete(ActionEvent actionEvent) {
         NotaDTO n = this.tableNote.getSelectionModel().getSelectedItem();
         if(n == null){
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","Nu ati selectat din tabel o nota!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","Nu ati selectat din tabel o nota!");
         }
         else {
             Nota rez = this.service.removeByIdNota(n.getIdNota());
             if (rez == null) {
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","Nota nu a putut fi stearsa!");
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR,"stergere","Nota nu a putut fi stearsa!");
             } else {
-                StudentAlert.showMessage(null, Alert.AlertType.CONFIRMATION,"stergere","Nota a fost stearsa cu succes!");
+                CustomAlert.showMessage(null, Alert.AlertType.CONFIRMATION,"stergere","Nota a fost stearsa cu succes!");
                 //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
                 //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!
                 //TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!//TODO: email student!!!

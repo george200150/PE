@@ -19,7 +19,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import mvc.StudentAlert;
+import mvc.CustomAlert;
+import mvc.controllers.login.LoginChoiceController;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -30,7 +31,10 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import services.MasterService;
 import utils.Constants;
 import utils.events.GradeChangeEvent;
+import utils.events.MotivationChangeEvent;
 import utils.observer.GradeObserver;
+import utils.observer.MotivationObserver;
+import validators.ValidationException;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -44,7 +48,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class ProfessorAccountController implements GradeObserver<GradeChangeEvent> {
+public class ProfessorAccountController implements GradeObserver<GradeChangeEvent>, MotivationObserver<MotivationChangeEvent> {
 
 
     public TableView<Student> tableStudent;
@@ -103,6 +107,11 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
     public ToggleButton toggleCharts;
     public AnchorPane anchor;
+    public DatePicker datePickerMotivareInceput;
+    public DatePicker datePickerMotivareSfarsit;
+    public TableView<Motivation> tableMotivariStudent;
+    public TableColumn columnMotivariStudent;
+    public TableColumn columnMotivariInterval;
 
     private void initializeClassesPieChart()
     {
@@ -179,6 +188,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
             series1.getData().add(new XYChart.Data<>(names.get(i), values.get(i)));
         }
         //Setting the data to bar chart
+        histo1.getData().clear();
         histo1.getData().addAll(series1);
     }
 
@@ -204,6 +214,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         series1.getData().add(new XYChart.Data<>("5-7", count57));
         series1.getData().add(new XYChart.Data<>("8-10", count810));
         //Setting the data to bar chart
+        histo2.getData().clear();
         histo2.getData().addAll(series1);
     }
 
@@ -226,6 +237,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         series1.getData().add(new XYChart.Data<>("Promovat", countOk));
         series1.getData().add(new XYChart.Data<>("Corigent", countNOT));
         //Setting the data to bar chart
+        histo3.getData().clear();
         histo3.getData().addAll(series1);
     }
 
@@ -248,6 +260,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         series1.getData().add(new XYChart.Data<>("La Timp", countOk));
         series1.getData().add(new XYChart.Data<>("Intarziat", countNOT));
         //Setting the data to bar chart
+        histo4.getData().clear();
         histo4.getData().addAll(series1);
     }
 
@@ -256,6 +269,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     private ObservableList<Student> modelS = FXCollections.observableArrayList();
     private ObservableList<Tema> modelT = FXCollections.observableArrayList();
     private ObservableList<NotaDTO> modelN = FXCollections.observableArrayList();
+    private ObservableList<Motivation> modelM = FXCollections.observableArrayList();
     private Stage dialogStage;
     private Profesor loggedInProfessor;
 
@@ -265,10 +279,11 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         this.loggedInProfessor = loggedInProfessor;
         service = masterService;
         service.addObserverGrade(this);
-        //extend to all observer types in the future...
+        service.getMotivationService().addObserverMotivation(this);
         initModelStudent();
         initModelTema();
         initModelGrade();
+        initModelMotivari();
         this.labelProfesor.setText(this.loggedInProfessor.toString());
         this.textNotaProf.setText(this.loggedInProfessor.toString());
         this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
@@ -316,6 +331,14 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
                 .collect(Collectors.toList());
         List<NotaDTO> gradeDTOList = convertGradeToDTO(gradeList);
         modelN.setAll(gradeDTOList);
+    }
+
+    private void initModelMotivari() {
+        Iterable<Motivation> motivari = service.getAllMotivation();
+        List<Motivation> motivationList = StreamSupport.stream(motivari.spliterator(), false)
+                .filter(x -> x.getCadruDidacticIndrumatorLabStudent().equals(this.loggedInProfessor.getNume() + " " + this.loggedInProfessor.getPrenume()))
+                .collect(Collectors.toList());
+        modelM.setAll(motivationList);
     }
 
 
@@ -389,12 +412,12 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         return Math.min(10, 10 - delay);
     }
 
-    private int computeMaxGrade(Student s, Tema t, String date) {//TODO: handle date shift to semester (from holiday)
+    private int computeMaxGrade(Student s, Tema t, String date) {// handle date shift to semester (from holiday)
         int grade = computeEffectiveGradeConsideringAllCases(s, t, date);
         return grade;
     }
 
-    private String computeFeedback(Student s, Tema t, String date) {//TODO: handle date shift to semester (from holiday)
+    private String computeFeedback(Student s, Tema t, String date) {// handle date shift to semester (from holiday)
         int grade = computeEffectiveGradeConsideringAllCases(s, t, date);
         if (grade <= 7) {
             return "TEMA NU MAI POATE FI PREDATA";
@@ -424,7 +447,16 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
     private void recomputeGrades() {
         if (this.tableNota.getSelectionModel().getSelectedItem() == null) {
-            this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
+            //TODO: removed for testing UX this.textNotaTema.setText(getTemaCurenta(this.dateNotaData.getValue()));
+            if(!this.textNotaId.getText().isEmpty()){
+                String[] id = this.textNotaId.getText().split(":");
+                Student s = this.service.findByIdStudent(id[0]);
+                Tema t = this.service.findByIdTema(id[1]);
+                String date = this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER);
+                int val = this.computeMaxGrade(s, t, date);
+                this.textNotaValoare.setText(Integer.toString(val));
+                this.textNotaFeedback.setText(this.computeFeedback(s, t, date));
+            }
         }
         if (this.checkboxInvert.isSelected()) {
             initModelGradeINVERTED();
@@ -433,7 +465,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
 
     private void filterMergeSearchStudent() {
-        Predicate<Student> filtered = null;//TODO: asa compunem predicatele
+        Predicate<Student> filtered = null;// asa compunem predicatele
 
         Iterable<Student> students = service.getAllStudent();
         List<Student> studentList = StreamSupport.stream(students.spliterator(), false)
@@ -444,8 +476,8 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         Predicate<Student> filterGrupa = x -> Integer.toString(x.getGrupa()).toLowerCase().contains(textStudentGrupa.getText().toLowerCase());
         Predicate<Student> filterEmail = x -> x.getEmail().toLowerCase().contains(textStudentEmail.getText().toLowerCase());
 
-        if (!textStudentNume.getText().isEmpty()) {//TODO: CHANGE ALL PREDICATES WITH {IF TEXTFIELD IS EMPTY => RETURN TRUE; ELSE RETURN THE FILTER}
-            if (filtered == null) {//TODO: HERE, WE DO NOT TEST IF FILTERED = NULL; WE INITIALIZE FILTERED VARIABLE AS UNION AND(ALL PREDICATES)
+        if (!textStudentNume.getText().isEmpty()) {// CHANGE ALL PREDICATES WITH {IF TEXTFIELD IS EMPTY => RETURN TRUE; ELSE RETURN THE FILTER}
+            if (filtered == null) {// HERE, WE DO NOT TEST IF FILTERED = NULL; WE INITIALIZE FILTERED VARIABLE AS UNION AND(ALL PREDICATES)
                 filtered = filterNume;
             } else {
                 filtered = filtered.and(filterNume);
@@ -608,6 +640,9 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         }));
 
 
+        columnMotivariInterval.setCellValueFactory(new PropertyValueFactory<Motivation, String>("intervalToString"));
+        columnMotivariStudent.setCellValueFactory(new PropertyValueFactory<Motivation, String>("studentToString"));
+        tableMotivariStudent.setItems(modelM);
     }
 
 
@@ -703,6 +738,16 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
     @Override
     public void updateGrade(GradeChangeEvent gradeChangeEvent) {
         initModelGrade();
+
+        histoChartRaport1();
+        histoChartRaport2();
+        histoChartRaport3();
+        histoChartRaport4();
+
+        pieChartRaport1();
+        pieChartRaport2();
+        pieChartRaport3();
+        pieChartRaport4();
     }
 
 
@@ -741,9 +786,9 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         String email = this.loggedInProfessor.getEmail();//USERNAME IS THE EMAIL!!!*/
         boolean state = this.service.changeProfessorPassword(email, oldPsswd, newPsswd);
         if (state) {
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Resetare", "parola a fost actualizata!");
+            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Resetare", "parola a fost actualizata!");
         } else {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Log In", "parola nu a putut fi actualizata!");
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Log In", "parola nu a putut fi actualizata!");
         }
     }
 
@@ -760,34 +805,39 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
             if (!this.textNotaValoare.getText().isEmpty() && !this.textNotaProf.getText().isEmpty() && !this.textNotaFeedback.getText().isEmpty()) {
                 Nota toBeAdded = new Nota(this.textNotaId.getText(), Integer.parseInt(this.textNotaValoare.getText()), this.textNotaProf.getText(), this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER), this.textNotaFeedback.getText());
                 if (this.textNotaId.getText().equals("")) {
-                    StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut crea o nota!");
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut crea o nota!");
                 } else {
                     Student s = this.service.findByIdStudent(toBeAdded.getId().split(":")[0]);
                     Tema t = this.service.findByIdTema(toBeAdded.getId().split(":")[1]);
                     int max = this.computeMaxGrade(s, t, this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER));
                     if (Integer.parseInt(this.textNotaValoare.getText()) > max) {
-                        StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Nota nu poate depasi " + max + " !");
+                        CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Nota nu poate depasi " + max + " !");
                     } else if (!Constants.compareDates(LocalDate.now(), this.dateNotaData.getValue())) {
-                        StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Data nu poate fi din viitor!");
+                        CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Data nu poate fi din viitor!");
                     } else {
-                        Nota rez = this.service.addNota(toBeAdded);
-                        if (rez == null) {
-                            List<Student> toBeEmailed = new ArrayList<>();
-                            toBeEmailed.add(s);
-                            //TODO: SendEmailUtility.sendEmail(toBeEmailed, toBeAdded.toString());
-                            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost adaugata!");
-                            handleclearFieldsNota();
+                        try{
+                            Nota rez = this.service.addNota(toBeAdded);
+                            if (rez == null) {
+                                //List<Student> toBeEmailed = new ArrayList<>();
+                                //toBeEmailed.add(s);
+                                //SendEmailUtility.sendEmail(toBeEmailed, "V-A FOST ADAUGATA O NOUA NOTA",toBeAdded.toString());
+                                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost adaugata!");
+                                handleclearFieldsNota();
 
-                        } else {
-                            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nota nu s-a putut adauga!");
+                            } else {
+                                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nota nu s-a putut adauga!");
+                            }
+                        }
+                        catch (ValidationException | IllegalArgumentException ex){
+                            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", ex.getMessage());
                         }
                     }
                 }
             } else {
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati un rand din tabela!");
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati un rand din tabela!");
             }
         } else {
-            StudentAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de adaugare, bifati casuta!");
+            CustomAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de adaugare, bifati casuta!");
         }
 
     }
@@ -796,14 +846,23 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         if (!checkboxInvert.isSelected()) {
             Nota n = this.service.findByIdNota(this.textNotaId.getText());
             if (n == null) {
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati o nota din tabel!");
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati o nota din tabel!");
             } else {
-                this.service.removeByIdNota(n.getId());
-                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost stearsa cu succes!");
-                handleclearFieldsNota();
+                Nota rez = this.service.removeByIdNota(n.getId());
+                if (rez == null){
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nota nu a putut fi stearsa!");
+                }
+                else{
+                    CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost stearsa cu succes!");
+                    //List<Student> toBeEmailed = new ArrayList<>();
+                    //Student found = this.service.findByIdStudent(n.getId().split(":")[0]);
+                    //toBeEmailed.add(found);
+                    //SendEmailUtility.sendEmail(toBeEmailed, "O NOTA V-A FOST STEARSA", n.toString());
+                    handleclearFieldsNota();
+                }
             }
         } else {
-            StudentAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de stergere, debifati casuta!");
+            CustomAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de stergere, debifati casuta!");
         }
     }
 
@@ -811,30 +870,38 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         if (!checkboxInvert.isSelected()) {
             Nota n = this.service.findByIdNota(textNotaId.getText());
             if (n == null) {
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut gasit nota!");
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut gasit nota!");
             } else {
-                Student s = this.service.findByIdStudent(n.getId().split(":")[0]);//TODO RECOMPUTE GRADE CONSIDERING MOTIVATIONS
+                Student s = this.service.findByIdStudent(n.getId().split(":")[0]);// RECOMPUTE GRADE CONSIDERING MOTIVATIONS
                 Tema t = this.service.findByIdTema(n.getId().split(":")[1]);
                 int max = this.computeMaxGrade(s, t, this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER));
 
                 if (Integer.parseInt(this.textNotaValoare.getText()) > max) {
-                    StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Nota nu poate depasi " + max + " !");
-                } else if (Constants.compareDates(this.dateNotaData.getValue(), LocalDate.now())) {
-                    StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Data nu poate fi din viitor!");
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Nota nu poate depasi " + max + " !");
+                } else if (!Constants.compareDates(LocalDate.now(), this.dateNotaData.getValue())) {
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "Data nu poate fi din viitor!");
                 } else {
                     Nota replace = new Nota(n.getId(), Integer.parseInt(this.textNotaValoare.getText()), n.getProfesor(), this.dateNotaData.getValue().format(Constants.DATE_TIME_FORMATTER), this.textNotaFeedback.getText());
-                    Nota rez = this.service.updateNota(replace);
-                    if (rez == null) {
-                        StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost modificata!");
-                        handleclearFieldsNota();
-                    } else {
-                        StudentAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "nota nu a putut fi modificata!");
+                    try{
+                        Nota rez = this.service.updateNota(replace);
+                        if (rez != null) {
+                            //List<Student> toBeEmailed = new ArrayList<>();
+                            //toBeEmailed.add(s);
+                            //SendEmailUtility.sendEmail(toBeEmailed, "V-A FOST MODIFICATA O NOTA",replace.toString());
+                            CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "nota a fost modificata!");
+                            handleclearFieldsNota();
+                        } else {
+                            CustomAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "nota nu a putut fi modificata!");
+                        }
+                    }
+                    catch (ValidationException | IllegalArgumentException ex){
+                        CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", ex.getMessage());
                     }
                 }
             }
 
         } else {
-            StudentAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de modificare, debifati casuta!");
+            CustomAlert.showMessage(null, Alert.AlertType.WARNING, "Avertisment", "pentru a intra in modul de modificare, debifati casuta!");
         }
     }
 
@@ -870,13 +937,15 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
 
     public void handleSelectionChanged(MouseEvent mouseEvent) {
         NotaDTO nota = this.tableNota.getSelectionModel().getSelectedItem();
-        this.textNotaId.setText(nota.getIdNota());
-        this.textNotaStudent.setText(nota.getS().toString());
-        this.textNotaProf.setText(nota.getProfesor());
-        this.textNotaValoare.setText(Integer.toString(nota.getValoare()));
-        this.dateNotaData.setValue(LocalDate.parse(nota.getDataNota(), Constants.DATE_TIME_FORMATTER));
-        this.textNotaFeedback.setText(nota.getFeedback());
-        this.textNotaTema.setText(nota.getT().toString());
+        if(nota != null) {
+            this.textNotaId.setText(nota.getIdNota());
+            this.textNotaStudent.setText(nota.getS().toString());
+            this.textNotaProf.setText(nota.getProfesor());
+            this.textNotaValoare.setText(Integer.toString(nota.getValoare()));
+            this.dateNotaData.setValue(LocalDate.parse(nota.getDataNota(), Constants.DATE_TIME_FORMATTER));
+            this.textNotaFeedback.setText(nota.getFeedback());
+            this.textNotaTema.setText(nota.getT().toString());
+        }
     }
 
     public void handleClearFieldsNota(ActionEvent actionEvent) {
@@ -994,7 +1063,7 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         }
         doc.save(pdfPath);
 
-        file.delete();
+        boolean ignored = file.delete();
 
         doc.save(new File(pdfPath));
     }
@@ -1010,9 +1079,9 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
         if (file != null) {
             try {
                 createPDFFromRaport(file.getAbsolutePath(), title, this.loggedInProfessor.toString(), lines);
-                StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
+                CustomAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
             } catch (IOException ex) {
-                StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "raportul a nu a putut fi salvat!");
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "raportul a nu a putut fi salvat!");
             }
         }
     }
@@ -1046,31 +1115,55 @@ public class ProfessorAccountController implements GradeObserver<GradeChangeEven
             itemsPieChart4.setVisible(true);
         }
     }
+
+    public void handleAdaugaMotivare(ActionEvent actionEvent) {
+        Student student = this.tableStudent.getSelectionModel().getSelectedItem();
+        if(student == null){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati intai un student din tabela!");
+        }
+        else{
+            LocalDate start = this.datePickerMotivareInceput.getValue();
+            LocalDate end = this.datePickerMotivareSfarsit.getValue();
+            Motivation motivation = new Motivation(student,start,end);
+            try{
+                Motivation rez = this.service.addMotivation(motivation);
+                if(rez == null){
+                    CustomAlert.showMessage(null, Alert.AlertType.CONFIRMATION, "Succes", "motivarea a fost salvata cu succes!");
+                }
+                else{
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "motivarea nu a putut fi salvata!");
+                }
+            }
+            catch (ValidationException | IllegalArgumentException ex){
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", ex.getMessage());
+            }
+        }
+    }
+
+    public void handleStergeMotivare(ActionEvent actionEvent) {
+        Motivation m = this.tableMotivariStudent.getSelectionModel().getSelectedItem();
+        if(m == null){
+            CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "selectati intai o motivare din tabela!");
+        }
+        else{
+            try{
+                Motivation rez = this.service.removeByIdMotivation(m.getId());
+                if(rez != null){
+                    CustomAlert.showMessage(null, Alert.AlertType.CONFIRMATION, "Succes", "motivarea a fost stearsa cu succes!");
+                }
+                else{
+                    CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "motivarea nu a putut fi stearsa!");
+                }
+            }
+            catch (ValidationException | IllegalArgumentException ex){
+                CustomAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void updateMotivation(MotivationChangeEvent motivationChangeEvent) {
+        initModelMotivari();
+    }
 }
 
-
-
-        /*try {
-            List<Object> lines = this.service.raport2();
-            String title = "Cea mai grea tema";
-            String pdfName;
-            if(this.textFileName2.getText().isEmpty()){
-                pdfName = this.textFileName2.getPromptText();
-            }
-            else{
-                pdfName = this.textFileName2.getText();
-            }
-            createPDFFromRaport(this.textSavePath.getText() + "\\" + pdfName, this.loggedInProfessor.toString(), title, lines);
-            StudentAlert.showMessage(null, Alert.AlertType.INFORMATION, "Succes", "raportul a fost salvat cu succes!");
-        } catch (IOException e) {
-            StudentAlert.showMessage(null, Alert.AlertType.ERROR, "Eroare", "nu s-a putut salva raportul!");
-            //e.printStackTrace();
-        }*/
-
-        /*final DirectoryChooser directoryChooser =
-                new DirectoryChooser();
-        final File selectedDirectory =
-                directoryChooser.showDialog(dialogStage);
-        if (selectedDirectory != null) {
-            this.textSavePath.setText(selectedDirectory.getAbsolutePath());
-        }*/

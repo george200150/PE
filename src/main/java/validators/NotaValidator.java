@@ -16,12 +16,12 @@ public class NotaValidator extends AbstractValidator<Nota> {
             exception += "Profesorul nu poate sa lipseasca\n";
         }
         if(entity.getValoare() > 10 || entity.getValoare() < 0 ){
-            exception += "Nota este incorect\n";
+            exception += "Valoarea notei este incorecta\n";
         }
 
         String[] id_s = entity.getId().split(":");
         if(id_s[0].equals("") || id_s[1].equals("")){
-            exception += "One of the id-s are missing\n";
+            exception += "Unul dintr id-uri lispseste\n";
         }
 
         if(exception.length() > 0)

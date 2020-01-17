@@ -3,7 +3,7 @@ package mvc.controllers.confirmations;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import mvc.controllers.LoginChoiceController;
+import mvc.controllers.login.LoginChoiceController;
 
 public class ExitConfirmController {
 

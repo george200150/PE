@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="242.0" prefWidth="541.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.confirmations.UpdateTemaConfirmController">
+<AnchorPane prefHeight="242.0" prefWidth="541.0" stylesheets="@../../css/Confirms.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.confirmations.UpdateTemaConfirmController">
    <children>
       <Label layoutX="67.0" layoutY="14.0" text="Tema aleasa are note existente">
          <font>

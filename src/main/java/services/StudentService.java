@@ -2,7 +2,7 @@ package services;
 
 
 import domain.Student;
-import repositories.AbstracBaseRepository;
+import repositories.CrudRepository;
 import utils.events.ChangeEventType;
 import utils.events.StudentChangeEvent;
 import utils.observer.Observable;
@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentService implements Service<String, Student>, Observable<StudentChangeEvent> {
-    private AbstracBaseRepository<String, Student> studentRepository = null;
+    private CrudRepository<String, Student> studentRepository = null;
     private List<Observer<StudentChangeEvent>> observers=new ArrayList<>();
 
-    public StudentService(AbstracBaseRepository studentRepository) {
+    public StudentService(CrudRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
 

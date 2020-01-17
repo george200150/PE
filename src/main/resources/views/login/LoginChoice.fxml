@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="240.0" prefWidth="530.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.LoginChoiceController">
+<AnchorPane prefHeight="240.0" prefWidth="530.0" style="-fx-background-color: linear-gradient(#dfd0ff, #8f99cb);" stylesheets="@../../css/General.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.login.LoginChoiceController">
    <children>
       <Button layoutX="117.0" layoutY="114.0" mnemonicParsing="false" onAction="#handleAdmin" prefHeight="44.0" prefWidth="71.0" text="Admin" />
       <Button layoutX="230.0" layoutY="114.0" mnemonicParsing="false" onAction="#handleProfessor" prefHeight="44.0" prefWidth="71.0" text="Profesor" />

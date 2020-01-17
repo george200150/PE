@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="330.0" prefWidth="553.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.LoginFormProfessorController">
+<AnchorPane prefHeight="330.0" prefWidth="553.0" style="-fx-background-color: linear-gradient(#dfd0ff, #8f99cb);" stylesheets="@../../css/General.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mvc.controllers.login.LoginFormProfessorController">
    <children>
       <Label layoutX="129.0" layoutY="14.0" text="FORMULAR DE LOGIN">
          <font>
